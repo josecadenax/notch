@@ -68,7 +68,7 @@ Duplicate. The same file again, with no charge:
 npm run stamp -- report.txt
 ```
 
-Expected: `hash already stamped, no charge`, and the balance does not move.
+Expected: `Already stamped, nothing was charged`, and the balance does not move.
 
 Tampered file. Change one character and verify again:
 

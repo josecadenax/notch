@@ -45,6 +45,12 @@ sequenceDiagram
 - **Verificar es gratis** y no requiere a Notch: el memo de la transacción se lee en cualquier explorador.
 - **Solo pagas por sellos que existen.** Un sello fallido nunca se cobra.
 
+## Demo en video
+
+[![Demo en video](docs/assets/demo/notch-demo-poster.jpg)](https://github.com/josecadenax/notch/blob/main/docs/assets/demo/notch-demo-backup.mp4)
+
+Pulsa la imagen para ver el video (1:23, sin audio). Es una animación hecha con la salida real de una ejecución en Stellar testnet, con las esperas acortadas. Los hashes que aparecen se pueden abrir en Stellar Expert.
+
 ## Cómo correrlo
 
 Requiere Node 22 o superior. El código vive en [`partes/josecadenax`](partes/josecadenax/README.md).

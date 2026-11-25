@@ -45,6 +45,12 @@ sequenceDiagram
 - **Verification is free** and does not need Notch: the memo of the transaction can be read on any explorer.
 - **You pay only for stamps that exist.** A failed stamp is never charged.
 
+## Demo video
+
+[![Demo video](docs/assets/demo/notch-demo-poster.jpg)](https://github.com/josecadenax/notch/blob/main/docs/assets/demo/notch-demo-backup.mp4)
+
+Click the image to watch the video (1:23, no audio). It is an animation built from the real output of a run on Stellar testnet, with the waits shortened. The hashes shown can be opened in Stellar Expert.
+
 ## How to run it
 
 Needs Node 22 or newer. The code lives in [`partes/josecadenax`](partes/josecadenax/README.md).
