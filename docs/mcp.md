@@ -21,13 +21,32 @@ Only the SHA-256 of a file leaves your computer, never the file itself.
 
 ## Your wallet
 
-Stamps are paid from **your own wallet**, the "paying wallet" or agent wallet. It is a Stellar account that only you hold:
+Stamps are paid from **your own wallet**, the "paying wallet" or agent wallet. It is a Stellar account that only you hold, and Notch never creates, holds or sees it:
 
-- It is created on your computer and its secret key (`AGENT_SECRET`) never goes to Notch or to any server.
-- The MCP server uses it to sign each payment. Anyone who has the secret can spend its balance, so keep it private.
-- **Use a dedicated wallet with a small balance**, not a wallet you use for anything else.
+- Its secret key (`AGENT_SECRET`) never goes to Notch or to any server.
+- The MCP server signs each payment on its own, without a confirmation window, so it needs the secret key itself. A wallet app that keeps the key inside it (Freighter, for example) cannot sign for it.
+- Anyone who can read the secret can spend the balance, and it sits in plain text in Claude Desktop's config. **Use a dedicated account with a small balance**, never your main wallet.
 
-Create one (testnet, free) with a single command from the project folder:
+### On mainnet: bring your own
+
+Use an account you already control and have funded. There is nothing to create, only to configure:
+
+1. **Pick the account.** It has to be one whose secret key you can export. A good choice is a new secondary account in your wallet (in Freighter, add an account), funded with a small amount. Export its secret key only when you are about to paste it into the config.
+2. **Make sure it is ready.** It needs XLM for its reserve (1 XLM, plus 0.5 XLM for the USDC trustline), the USDC trustline and some USDC. If it already holds USDC it is ready.
+3. **Put the secret in `AGENT_SECRET`** (see [Mainnet](#mainnet)).
+4. **Check it, read-only, with its public address only** (no secret needed):
+
+   ```bash
+   STELLAR_NETWORK=pubnet AGENT_PUBLIC=G...your address... node partes/josecadenax/scripts/check-accounts.js
+   ```
+
+5. Ask Claude *"check my Notch balance"* to see the wallet, its balance and how many stamps it can pay.
+
+If you have no account to bring, `STELLAR_NETWORK=pubnet npm run setup:accounts -- --keys-only --agent-only` makes a new key offline, with nothing on the network. You fund it yourself and must back up its secret.
+
+### On testnet: create a test wallet
+
+Testnet money is free, so here Notch can create and fund the wallet for you, from the project folder:
 
 ```bash
 npm run setup:accounts -- --agent-only
@@ -49,7 +68,7 @@ To top it up later, send test USDC to the wallet address from <https://faucet.ci
    npm install
    ```
 
-2. Create your paying wallet, as shown above (`npm run setup:accounts -- --agent-only`). Open `.env.agent` and copy the `AGENT_SECRET=...` value.
+2. Get your paying wallet, as shown above. On testnet, `npm run setup:accounts -- --agent-only` creates one: open `.env.agent` and copy the `AGENT_SECRET=...` value. On mainnet, bring your own account.
 
 3. Find the absolute path of Node, because Claude Desktop does not read your shell profile:
 
@@ -81,7 +100,7 @@ Use **absolute paths** for files. Claude Desktop does not run in your project fo
 
 Everything above uses testnet and test money. Mainnet uses **real money**, so it is never on by accident: you have to ask for it, name everything it needs, and there are no defaults to fall back on. The full plan is in [mainnet.md](mainnet.md).
 
-Add these to the `env` block of the `notch` server, together with your `AGENT_SECRET`:
+Add these to the `env` block of the `notch` server. `AGENT_SECRET` is the account you bring, as explained in [Your wallet](#on-mainnet-bring-your-own):
 
 ```json
 "env": {
@@ -152,8 +171,8 @@ For local development, `NOTCH_API_URL=http://localhost:3001` needs no `EXPECTED_
 | Symptom | Likely cause |
 |---|---|
 | Claude shows the server as failed | `command` is not the absolute path to Node, or the `args` path is wrong. Check Claude's MCP log |
-| "Missing AGENT_SECRET" | The `env` block is missing or the key is empty. Create a wallet with `npm run setup:accounts -- --agent-only` |
-| `WALLET_NOT_FOUND` | The wallet was never funded. Run `npm run setup:accounts -- --agent-only` or fund the address with test XLM from Friendbot |
+| "Missing AGENT_SECRET" | The `env` block is missing or the key is empty. On testnet create a wallet with `npm run setup:accounts -- --agent-only`. On mainnet put the secret of the account you bring |
+| `WALLET_NOT_FOUND` | The wallet was never funded. On testnet run `npm run setup:accounts -- --agent-only`. On mainnet send XLM to its address first |
 | `PAYEE_MISMATCH` | The API is asking to pay an account other than `EXPECTED_PAYEE`. Do not continue until you know why |
 | `INSUFFICIENT_BALANCE` | The agent wallet has less than 0.01 USDC |
 | `API_UNREACHABLE` | The API is down or you are offline. Nothing was paid |

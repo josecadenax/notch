@@ -59,7 +59,7 @@ How a user finds out they have to do this: if anything is missing the MCP server
 |---|---|---|
 | **payee** | Receives the 0.01 USDC of each stamp | XLM for its reserve, a USDC trustline. Its **secret** must be kept offline: it is the only way to withdraw what it earns |
 | **stamper** | Signs the stamp transactions and pays their fee (a fraction of a cent) | XLM for its reserve and fees. Its secret lives on the server |
-| **agent** | The user's paying wallet | XLM for its reserve, a USDC trustline and some USDC. Its secret stays on the user's machine |
+| **agent** | The user's paying wallet. A dedicated account the user **brings**, not one Notch creates | XLM for its reserve, a USDC trustline and some USDC. Its secret stays on the user's machine |
 
 An account must keep a reserve: 1 XLM, plus 0.5 XLM for each trustline. A stamp transaction costs 0.00001 XLM, so the stamper's fees are negligible next to its reserve.
 
@@ -75,17 +75,17 @@ Decide where the **payee** lives. It is the account that receives the money, and
 
   ```bash
   STELLAR_NETWORK=pubnet npm run setup:accounts -- --keys-only --stamper-only   # stamper into .env.mainnet-stamper
-  STELLAR_NETWORK=pubnet npm run setup:accounts -- --keys-only --agent-only     # your paying wallet into .env.mainnet-agent
   ```
 
 - **A new account made here.** It also saves `PAYEE_SECRET` in a file, which you must keep offline:
 
   ```bash
   STELLAR_NETWORK=pubnet npm run setup:accounts -- --keys-only                  # payee and stamper into .env.mainnet
-  STELLAR_NETWORK=pubnet npm run setup:accounts -- --keys-only --agent-only
   ```
 
-Use dedicated accounts for the stamper and the agent, never your main wallet: the stamper's secret lives on the server and the agent's in Claude Desktop's config, so each should hold only what you can afford to lose.
+The **paying wallet (agent)** is not made here: each user brings their own, as [mcp.md](mcp.md#on-mainnet-bring-your-own) explains. This is also what you do for your own stamps: use an account you control and have funded, ideally a dedicated one.
+
+Use a dedicated account for the stamper too, never your main wallet. The stamper's secret lives on the server and the agent's in Claude Desktop's config, so each should hold only what you can afford to lose.
 
 This generates keys offline and prints the public addresses. **Back up the secrets in a password manager now.** Losing one means losing what is in that account.
 
@@ -101,21 +101,22 @@ Then:
 
 ### 2. Fund the accounts and add the trustlines
 
-You send the XLM yourself (from your wallet or exchange) to the three public addresses. Each account needs its 1 XLM base reserve to exist, plus 0.5 XLM for each trustline. Notch cannot and should not move your money.
+You send the XLM yourself (from your wallet or exchange) to the public addresses of the payee and the stamper. The agent is the account you bring: if it is not ready yet, fund it too. Each account needs its 1 XLM base reserve to exist, plus 0.5 XLM for each trustline. Notch cannot and should not move your money.
 
-Then the USDC trustline, on the payee and on the agent. If the payee is a Freighter account, add the USDC asset from Freighter instead and skip it below. The script only shows what it would do unless you add `--yes`, and it reads the secret from a variable, never from the command line:
+Then the USDC trustline, on the payee and on the agent when they do not have it. If the payee is a Freighter account, add the USDC asset from Freighter instead. An agent account that already holds USDC needs nothing. The script only shows what it would do unless you add `--yes`, and it reads the secret from a variable, never from the command line:
 
 ```bash
 export STELLAR_NETWORK=pubnet NOTCH_ALLOW_MAINNET=1
 node --env-file=.env.mainnet partes/josecadenax/scripts/add-trustline.js PAYEE_SECRET          # shows the plan
 node --env-file=.env.mainnet partes/josecadenax/scripts/add-trustline.js PAYEE_SECRET --yes    # does it
-node --env-file=.env.mainnet-agent partes/josecadenax/scripts/add-trustline.js AGENT_SECRET --yes
 ```
 
-Finally send USDC to the agent. Check everything, read-only:
+For an agent that needs it, run the same script with `--env-file` pointing to the file where you keep its `AGENT_SECRET`, and `AGENT_SECRET` as the variable name.
+
+Finally make sure the agent holds some USDC. Check everything, read-only. The agent only needs its **public** address here:
 
 ```bash
-STELLAR_NETWORK=pubnet node --env-file=.env.mainnet --env-file-if-exists=.env.mainnet-agent partes/josecadenax/scripts/check-accounts.js
+STELLAR_NETWORK=pubnet AGENT_PUBLIC=G...your agent address... node --env-file=.env.mainnet partes/josecadenax/scripts/check-accounts.js
 ```
 
 It must say `All good.` before you go on.
