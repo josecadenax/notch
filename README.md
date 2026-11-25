@@ -122,6 +122,7 @@ Los documentos técnicos están en inglés:
 - [Servidor MCP](docs/mcp.md): cómo usar Notch desde Claude Desktop, la cartera del agente y las reglas de seguridad.
 - [Despliegue](docs/deploy.md): cómo publicar tu propio servidor (Railway), qué secretos hacen falta y dónde viven.
 - [Facilitador x402](docs/facilitator.md): cómo probar el facilitador de OpenZeppelin en testnet y medir su límite diario.
+- [Mainnet](docs/mainnet.md): qué ya está protegido en el código, qué falta y el plan paso a paso para usar dinero real.
 
 ## Hashes de prueba
 

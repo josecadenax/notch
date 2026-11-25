@@ -120,6 +120,7 @@ API_URL=https://notch-production-721b582b.up.railway.app npm run stamp -- file.p
 - [MCP server](docs/mcp.md): how to use Notch from Claude Desktop, the agent wallet and the safety rules.
 - [Deployment](docs/deploy.md): how to publish your own server (Railway), which secrets are needed and where they live.
 - [x402 facilitator](docs/facilitator.md): how to try the OpenZeppelin facilitator on testnet and measure its daily limit.
+- [Mainnet](docs/mainnet.md): what the code already protects, what is missing and the step-by-step plan for real money.
 
 ## Test hashes
 

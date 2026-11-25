@@ -3,7 +3,7 @@ import { x402Client, x402HTTPClient, wrapFetchWithPayment } from "@x402/fetch";
 import { createEd25519Signer } from "@x402/stellar";
 import { ExactStellarScheme } from "@x402/stellar/exact/client";
 import { isValidHash } from "./hash.js";
-import { NETWORK, SOROBAN_RPC_URL, HORIZON_URL, EXPLORER_TX_URL } from "./config.js";
+import { NETWORK, IS_MAINNET, SOROBAN_RPC_URL, HORIZON_URL, EXPLORER_TX_URL, mainnetBlocker } from "./config.js";
 
 // Reusable client for the paid stamp flow. It never prints or exits: callers (the CLI and the
 // MCP server) decide how to show results. Failures are NotchError with a stable `code`.
@@ -54,14 +54,23 @@ export function createStampClient({
   fetchFn = fetch,
   horizonUrl = HORIZON_URL,
   sorobanRpcUrl = SOROBAN_RPC_URL,
+  network = NETWORK,
+  isMainnet = IS_MAINNET,
+  env = process.env,
   log = () => {},
   sleep = wait,
 }) {
   if (!secret) throw new NotchError("NO_SECRET", "Missing AGENT_SECRET (the wallet that pays for stamps).");
+  // Real money needs an explicit yes, and a Soroban RPC of your own (SDF runs none for mainnet).
+  const blocked = mainnetBlocker({ isMainnet }, env);
+  if (blocked) throw new NotchError("MAINNET_NOT_CONFIRMED", blocked);
+  if (isMainnet && !sorobanRpcUrl) {
+    throw new NotchError("RPC_REQUIRED", "Mainnet needs SOROBAN_RPC_URL: SDF runs no public Soroban RPC for mainnet. See docs/mainnet.md.");
+  }
   const base = assertSafeApiUrl(apiUrl, expectedPayee);
 
   // The agent signs with its own wallet, never with the payee or stamper keys.
-  const signer = createEd25519Signer(secret, NETWORK);
+  const signer = createEd25519Signer(secret, network);
   const client = x402Client.fromConfig({
     schemes: [{ network: "stellar:*", client: new ExactStellarScheme(signer, { url: sorobanRpcUrl }) }],
     // Spending cap: if the API asks for more, x402 refuses BEFORE signing anything.
@@ -112,8 +121,8 @@ export function createStampClient({
 
     // 1. Quote, then check who would be paid before anything is signed.
     const offer = await quote(request);
-    if (offer.network !== NETWORK) {
-      throw new NotchError("NETWORK_MISMATCH", `The API asks for payment on ${offer.network}, expected ${NETWORK}. Nothing was signed.`);
+    if (offer.network !== network) {
+      throw new NotchError("NETWORK_MISMATCH", `The API asks for payment on ${offer.network}, expected ${network}. Nothing was signed.`);
     }
     if (expectedPayee && offer.payTo !== expectedPayee) {
       throw new NotchError(

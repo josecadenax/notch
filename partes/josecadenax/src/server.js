@@ -5,11 +5,17 @@ import { createStamper } from "./stamper.js";
 import { createFileRegistry } from "./registry.js";
 import { createRateLimiter } from "./rate-limit.js";
 import { createFacilitator, missingApiKey } from "./facilitator.js";
-import { PORT, PRICE, NETWORK, FACILITATOR_URL } from "./config.js";
+import { PORT, PRICE, NETWORK, NETWORK_LABEL, IS_MAINNET, FACILITATOR_URL, mainnetBlocker } from "./config.js";
 
 const { PAYEE_PUBLIC, STAMPER_SECRET } = process.env;
 if (!PAYEE_PUBLIC || !STAMPER_SECRET) {
   console.error("Missing PAYEE_PUBLIC or STAMPER_SECRET. Run: npm run setup:accounts");
+  process.exit(1);
+}
+
+const blocked = mainnetBlocker({ isMainnet: IS_MAINNET });
+if (blocked) {
+  console.error(blocked);
   process.exit(1);
 }
 
@@ -35,4 +41,7 @@ const app = createApp({
   trustProxy: process.env.TRUST_PROXY ? Number(process.env.TRUST_PROXY) : false,
 });
 
-app.listen(PORT, () => console.log(`Notch listening on http://localhost:${PORT} (${PRICE} USDC per stamp)`));
+app.listen(PORT, () => {
+  console.log(`Notch listening on http://localhost:${PORT} (${PRICE} USDC per stamp)`);
+  console.log(`Network: ${NETWORK_LABEL}${IS_MAINNET ? " (REAL money)" : " (test money)"}, facilitator ${FACILITATOR_URL}`);
+});

@@ -3,14 +3,18 @@ import { resolve } from "node:path";
 import { sha256File } from "./hash.js";
 import { verifyStamp } from "./verifier.js";
 import { createStampClient, assertSafeApiUrl, NotchError } from "./stamp-client.js";
-import { PUBLIC_API_URL, PUBLIC_PAYEE, PUBLIC_STAMPER, PRICE } from "./config.js";
+import { PUBLIC_API_URL, PUBLIC_PAYEE, PUBLIC_STAMPER, PRICE, networkSettings } from "./config.js";
 
 // Reads the MCP server settings from environment variables.
-// The public deployment is pinned by default (payee and stamper); any other API needs its own pin.
+// The public testnet deployment is pinned by default (payee and stamper); any other API needs its own pin.
+// On mainnet there is no default API: you must name it and its payee.
 export function readSettings(env = process.env) {
-  const apiUrl = (env.NOTCH_API_URL || PUBLIC_API_URL).replace(/\/+$/, "");
-  const isPublic = apiUrl === PUBLIC_API_URL;
+  const { isMainnet, label } = networkSettings(env);
+  const apiUrl = (env.NOTCH_API_URL || (isMainnet ? "" : PUBLIC_API_URL)).replace(/\/+$/, "");
+  const isPublic = !isMainnet && apiUrl === PUBLIC_API_URL;
   return {
+    network: label,
+    isMainnet,
     secret: env.AGENT_SECRET,
     apiUrl,
     spendCap: env.SPEND_CAP || "$0.02",
@@ -40,13 +44,19 @@ export function createNotchTools({
 } = {}) {
   const settings = readSettings(env);
   let client;
-  const getClient = () =>
-    (client ??= createClient({
+  const getClient = () => {
+    if (!settings.apiUrl) {
+      throw new NotchError("NO_API_URL", "On mainnet, set NOTCH_API_URL (and EXPECTED_PAYEE): there is no default API.");
+    }
+    return (client ??= createClient({
       secret: settings.secret,
       apiUrl: settings.apiUrl,
       spendCap: settings.spendCap,
       expectedPayee: settings.expectedPayee,
+      env,
+      isMainnet: settings.isMainnet,
     }));
+  };
 
   async function stampFile({ path }) {
     try {
@@ -83,6 +93,7 @@ export function createNotchTools({
       const usdc = (await paying.usdcBalance()) / 1e7;
       const price = Number(PRICE.replace("$", ""));
       const lines = [
+        `Network: ${settings.network}${settings.isMainnet ? " (REAL money)" : " (test money)"}`,
         `Paying wallet: ${paying.address}`,
         `Balance: ${usdc} USDC (about ${Math.floor(usdc / price)} stamps at ${price} USDC each)`,
         `Spend cap per stamp: ${settings.spendCap}`,
@@ -90,7 +101,11 @@ export function createNotchTools({
         settings.expectedPayee ? `Only pays to: ${settings.expectedPayee}` : "Only pays to: any account (local API)",
       ];
       if (usdc < price) {
-        lines.push(`Not enough for a stamp. On testnet, get free USDC at https://faucet.circle.com (Stellar testnet) and send it to ${paying.address}.`);
+        lines.push(
+          settings.isMainnet
+            ? `Not enough for a stamp. Send USDC (and a little XLM for the reserve) to ${paying.address}.`
+            : `Not enough for a stamp. On testnet, get free USDC at https://faucet.circle.com (Stellar testnet) and send it to ${paying.address}.`,
+        );
       }
       return ok(lines.join("\n"));
     } catch (error) {
