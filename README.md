@@ -1,71 +1,77 @@
 <p align="center">
-  <img src="docs/assets/logo/notch-logo-256.png" alt="Notch logo" width="160" height="160">
+  <img src="docs/assets/logo/notch-logo-256.png" alt="Logo de Notch" width="160" height="160">
 </p>
+
+Español | [English](README.en.md)
 
 # Notch
 
 [![Tests](https://github.com/josecadenax/notch/actions/workflows/test.yml/badge.svg)](https://github.com/josecadenax/notch/actions/workflows/test.yml)
 
-**Pay-per-use timestamps for AI agents, on Stellar.**
+**Sellos de tiempo de pago por uso para agentes de IA, sobre Stellar.**
 
-An agent hashes what it produced, pays 0.01 USDC with x402, and Notch anchors that hash in a Stellar transaction. From then on, anyone can prove for free that the document existed no later than that date.
+Un agente calcula el hash de lo que produjo, paga 0.01 USDC con x402, y Notch ancla ese hash en una transacción de Stellar. Desde ese momento, cualquiera puede comprobar gratis que el documento existía a más tardar en esa fecha.
 
-**Track:** API de pago (x402) · Código 402 · BAF México × Programa de Embajadores de Stellar · Stellar testnet (test money, no real value)
+**Track:** API de pago (x402) · Código 402 · BAF México × Programa de Embajadores de Stellar · Stellar testnet (dinero de prueba, sin valor real)
 
-## The problem
+## El problema
 
-Agents now write reports, contracts and datasets, and often get paid for them. When someone asks "was this written before the deadline?" or "was it changed afterwards?", the only evidence is the agent's own logs, which the same party controls.
+Los agentes ya escriben informes, contratos y conjuntos de datos, y a veces cobran por ellos. Cuando alguien pregunta "¿esto existía antes de la fecha límite?" o "¿se modificó después?", la única evidencia son los registros del propio agente, que controla la misma parte.
 
-## How Notch solves it
+Un agente además no tiene cuenta, tarjeta ni contrato con un proveedor de sellos de tiempo. Lo que sí puede hacer es pagar un centavo por llamada, y por eso Notch cobra con x402: sin registro, sin llave de API y sin suscripción.
+
+## Cómo lo resuelve Notch
 
 ```mermaid
 sequenceDiagram
-    participant A as Agent
-    participant N as Notch API
-    participant F as x402 facilitator
+    participant A as Agente
+    participant N as API de Notch
+    participant F as Facilitador x402
     participant S as Stellar
-    A->>A: SHA-256 of the file (the file stays local)
+    A->>A: SHA-256 del archivo (el archivo no sale de la máquina)
     A->>N: POST /stamp { hash }
     N-->>A: 402 Payment Required (0.01 USDC)
-    A->>N: POST /stamp + signed payment
-    N->>F: verify payment
-    N->>S: transaction with the hash as memo
-    S-->>N: ledger closed, date fixed
-    N->>F: settle payment (only if the stamp succeeded)
+    A->>N: POST /stamp + pago firmado
+    N->>F: verifica el pago
+    N->>S: transacción con el hash como memo
+    S-->>N: ledger cerrado, la fecha queda fija
+    N->>F: liquida el pago (solo si el sello se creó)
     N-->>A: 200 { tx, ledger, stampedAt }
-    Note over A,S: Later, anyone: GET /verify, or read the tx on Stellar. Free.
+    Note over A,S: Después, cualquiera: GET /verify, o leer la tx en Stellar. Gratis.
 ```
 
-- **Only the hash travels.** The document never leaves the machine.
-- **The date is Stellar's**, the close time of the ledger, not the server's clock.
-- **Verification is free** and does not need Notch: the memo of the transaction can be read on any explorer.
-- **You pay only for stamps that exist.** A failed stamp is never charged.
+- **Solo viaja el hash.** El documento nunca sale de la máquina.
+- **La fecha es la de Stellar**, la hora de cierre del ledger, no el reloj del servidor.
+- **Verificar es gratis** y no requiere a Notch: el memo de la transacción se lee en cualquier explorador.
+- **Solo pagas por sellos que existen.** Un sello fallido nunca se cobra.
 
-## How to run it
+## Cómo correrlo
 
-Needs Node 22 or newer. The code lives in [`partes/josecadenax`](partes/josecadenax/README.md).
+Requiere Node 22 o superior. El código vive en [`partes/josecadenax`](partes/josecadenax/README.md).
 
 ```
 npm install
-npm run setup:accounts           # testnet accounts, keys saved in .env
-npm start                        # API on http://localhost:3001
-npm run stamp -- file.pdf        # another terminal: hash, pay and stamp
-npm run verify -- file.pdf <tx>  # check a file against a stamp
-npm test                         # 21 tests
+npm run setup:accounts           # cuentas de testnet, las llaves se guardan en .env
+npm start                        # API en http://localhost:3001
+npm run stamp -- archivo.pdf     # en otra terminal: calcula el hash, paga y sella
+npm run verify -- archivo.pdf <tx>  # comprueba un archivo contra un sello
+npm test                         # 21 pruebas
 ```
 
-## Documentation
+## Documentación
 
-- [Architecture](docs/architecture.md): pieces, API contract, what is on chain, errors and charges.
-- [Demo guide](docs/demo.md): the 3-minute script and the exact commands.
+Los documentos técnicos están en inglés:
 
-## Test hashes
+- [Arquitectura](docs/architecture.md): piezas, contrato de la API, qué queda en la cadena, errores y cobros.
+- [Guía de la demo](docs/demo.md): el guion de 5 minutos y los comandos exactos.
 
-A real run on Stellar testnet:
+## Hashes de prueba
 
-- Payment of 0.01 USDC (x402): [`15ae64c6…43bd`](https://stellar.expert/explorer/testnet/tx/15ae64c6e6a6bca9ae3775ca4971f0d5f7d6d89dfcd6ec9c2ceadd778e2743bd)
-- Stamp, with the file hash in its memo: [`980e4423…1bc0`](https://stellar.expert/explorer/testnet/tx/980e4423e8a7476d899aed94d7d4220f5071ee45bdaa939a0f7c04a76cfc1bc0)
+Una ejecución real en Stellar testnet:
 
-## Team and parts
+- Pago de 0.01 USDC (x402): [`15ae64c6…43bd`](https://stellar.expert/explorer/testnet/tx/15ae64c6e6a6bca9ae3775ca4971f0d5f7d6d89dfcd6ec9c2ceadd778e2743bd)
+- Sello, con el hash del archivo en su memo: [`980e4423…1bc0`](https://stellar.expert/explorer/testnet/tx/980e4423e8a7476d899aed94d7d4220f5071ee45bdaa939a0f7c04a76cfc1bc0)
 
-- [josecadenax](https://github.com/josecadenax): [their part](partes/josecadenax/README.md)
+## Equipo y partes
+
+- [josecadenax](https://github.com/josecadenax): [su parte](partes/josecadenax/README.md)
