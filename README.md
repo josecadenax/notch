@@ -7,6 +7,7 @@ Español | [English](README.en.md)
 # Notch
 
 [![Tests](https://github.com/josecadenax/notch/actions/workflows/test.yml/badge.svg)](https://github.com/josecadenax/notch/actions/workflows/test.yml)
+[![Public API](https://img.shields.io/website?url=https%3A%2F%2Fnotch-production-721b582b.up.railway.app&up_message=online&down_message=offline&label=public%20API)](https://notch-production-721b582b.up.railway.app)
 [![License: ISC](https://img.shields.io/badge/license-ISC-blue)](LICENSE)
 [![Node 22+](https://img.shields.io/badge/node-%3E%3D22-339933?logo=nodedotjs&logoColor=white)](package.json)
 [![Stellar testnet](https://img.shields.io/badge/Stellar-testnet-7D00FF?logo=stellar&logoColor=white)](https://stellar.expert/explorer/testnet)
