@@ -7,6 +7,11 @@
 # Notch
 
 [![Tests](https://github.com/josecadenax/notch/actions/workflows/test.yml/badge.svg)](https://github.com/josecadenax/notch/actions/workflows/test.yml)
+[![License: ISC](https://img.shields.io/badge/license-ISC-blue)](LICENSE)
+[![Node 22+](https://img.shields.io/badge/node-%3E%3D22-339933?logo=nodedotjs&logoColor=white)](package.json)
+[![Stellar testnet](https://img.shields.io/badge/Stellar-testnet-7D00FF?logo=stellar&logoColor=white)](https://stellar.expert/explorer/testnet)
+[![x402](https://img.shields.io/badge/x402-pay%20per%20use-413A68)](https://www.x402.org)
+[![MCP server](https://img.shields.io/badge/MCP-server-18A8B5)](docs/mcp.md)
 
 **Pay-per-use timestamps for AI agents, on Stellar.**
 
