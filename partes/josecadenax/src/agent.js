@@ -47,10 +47,6 @@ let price;
 for (let attempt = 1; ; attempt++) {
   try {
     const response = await fetch(`${API_URL}/stamp`, request);
-    if (response.status === 409) {
-      console.log("Already stamped, nothing to pay:", (await response.json()).stamp);
-      process.exit(0);
-    }
     if (response.status !== 402) {
       console.log(`Unexpected answer ${response.status}:`, await response.text());
       process.exit(1);
@@ -79,6 +75,12 @@ if (balance < price) {
 try {
   const response = await payingFetch(`${API_URL}/stamp`, request);
   const body = await response.json();
+  if (response.status === 409) {
+    // x402 answers 402 before the API checks the hash, so the agent signs first. The API then
+    // refuses with 409 and the payment is never settled: nothing is charged.
+    console.log("Already stamped, nothing was charged. Existing stamp:", body.stamp);
+    process.exit(0);
+  }
   if (!response.ok) {
     console.log(`Stamp refused (${response.status}):`, body);
     process.exit(1);
