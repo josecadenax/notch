@@ -16,3 +16,9 @@ export const PRICE = "$0.01";
 export const USDC = new Asset("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5");
 
 export const EXPLORER_TX_URL = "https://stellar.expert/explorer/testnet/tx/";
+
+// The public deployment. Clients pin these two public keys so a hijacked or fake API cannot
+// collect payments: the payee is who must be paid, the stamper is who must sign the stamp.
+export const PUBLIC_API_URL = "https://notch-production-721b582b.up.railway.app";
+export const PUBLIC_PAYEE = "GALUWRVBHUOYAC2AZUUEA7QRS2V4CX46OFPLRKAKAIIPSDMRZWL43TQQ";
+export const PUBLIC_STAMPER = "GCLUSRU43N2QAIL54A7CYXDRDQ4KGS4DI3RZTF7ORQUZWNV6U3AHYNUS";

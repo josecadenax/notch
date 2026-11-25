@@ -58,8 +58,10 @@ The second one must answer `402 Payment Required`. Then stamp a real file with t
 
 ```
 echo "deploy check $(date +%s)" > check.txt
-API_URL=$URL npm run stamp -- check.txt
+API_URL=$URL EXPECTED_PAYEE=<your PAYEE_PUBLIC> npm run stamp -- check.txt
 ```
+
+The agent refuses to pay an API outside `localhost` unless you pin who must be paid (`EXPECTED_PAYEE`). For your own deployment that is its `PAYEE_PUBLIC`. See [mcp.md](mcp.md).
 
 You should see the payment and the stamp. Open both links in Stellar Expert: the payment goes to your new `PAYEE_PUBLIC` and the stamp is signed by your new `STAMPER_PUBLIC`.
 
