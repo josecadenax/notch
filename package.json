@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "description": "Pay-per-use timestamping API for AI agents on Stellar, paid with x402",
   "scripts": {
-    "test": "node --env-file-if-exists=.env --test"
+    "test": "node --env-file-if-exists=.env --test",
+    "setup:accounts": "node --env-file-if-exists=.env partes/josecadenax/scripts/setup-accounts.js",
+    "start": "node --env-file-if-exists=.env partes/josecadenax/src/server.js",
+    "stamp": "node --env-file-if-exists=.env partes/josecadenax/src/agent.js",
+    "verify": "node --env-file-if-exists=.env partes/josecadenax/src/verify-cli.js"
   },
   "repository": {
     "type": "git",
