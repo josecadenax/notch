@@ -18,6 +18,8 @@ An agent hashes what it produced, pays 0.01 USDC with x402, and Notch anchors th
 
 Agents now write reports, contracts and datasets, and often get paid for them. When someone asks "was this written before the deadline?" or "was it changed afterwards?", the only evidence is the agent's own logs, which the same party controls.
 
+An agent also has no account, no credit card and no contract with a timestamp provider. What it can do is pay one cent per call, which is why Notch charges with x402: no sign-up, no API key and no subscription.
+
 ## How Notch solves it
 
 ```mermaid
