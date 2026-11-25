@@ -71,9 +71,21 @@ export const API_URL = process.env.API_URL || `http://localhost:${PORT}`;
 // Price of one stamp, in USDC.
 export const PRICE = "$0.01";
 
-// The public TESTNET deployment. Clients pin these two public keys so a hijacked or fake API cannot
-// collect payments: the payee is who must be paid, the stamper is who must sign the stamp.
-// They are only used on testnet. On mainnet there is no default: the user must name the API and its payee.
+// The official deployments. Clients pin these public keys so a hijacked or fake API cannot collect
+// payments: the payee is who must be paid, the stamper is who must sign the stamp.
 export const PUBLIC_API_URL = "https://notch-production-721b582b.up.railway.app";
 export const PUBLIC_PAYEE = "GALUWRVBHUOYAC2AZUUEA7QRS2V4CX46OFPLRKAKAIIPSDMRZWL43TQQ";
 export const PUBLIC_STAMPER = "GCLUSRU43N2QAIL54A7CYXDRDQ4KGS4DI3RZTF7ORQUZWNV6U3AHYNUS";
+
+export const OFFICIAL = {
+  testnet: { apiUrl: PUBLIC_API_URL, payee: PUBLIC_PAYEE, stamper: PUBLIC_STAMPER },
+  // Fill these in the day the official mainnet API is live. While they are empty, nothing is assumed
+  // on mainnet and the user must name the API and its payee. Once filled, users of the official API
+  // need to set neither of them. The values are public keys and a URL, never secrets.
+  mainnet: { apiUrl: "", payee: "", stamper: "" },
+};
+
+// The official deployment for the current network (empty strings when there is none).
+export function officialDeployment(isMainnet, official = OFFICIAL) {
+  return isMainnet ? official.mainnet : official.testnet;
+}

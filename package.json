@@ -9,6 +9,7 @@
     "stamp": "node --env-file-if-exists=.env partes/josecadenax/src/agent.js",
     "verify": "node --env-file-if-exists=.env partes/josecadenax/src/verify-cli.js",
     "mcp": "node partes/josecadenax/src/mcp-server.js",
+    "trustline": "node --env-file-if-exists=.env partes/josecadenax/scripts/add-trustline.js",
     "accounts:check": "node --env-file-if-exists=.env partes/josecadenax/scripts/check-accounts.js",
     "facilitator:check": "node --env-file-if-exists=.env partes/josecadenax/scripts/check-facilitator.js"
   },

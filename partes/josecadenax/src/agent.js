@@ -1,5 +1,5 @@
 import { sha256File } from "./hash.js";
-import { API_URL, PUBLIC_API_URL, PUBLIC_PAYEE, IS_MAINNET } from "./config.js";
+import { API_URL, IS_MAINNET, officialDeployment } from "./config.js";
 import { createStampClient, NotchError } from "./stamp-client.js";
 
 // An agent that stamps a file: hashes it locally, pays with x402 and prints the proof.
@@ -17,8 +17,9 @@ if (!process.env.AGENT_SECRET) {
   process.exit(1);
 }
 
-// Pay only the account we expect. For the public deployment it is pinned by default.
-const expectedPayee = process.env.EXPECTED_PAYEE || (!IS_MAINNET && API_URL === PUBLIC_API_URL ? PUBLIC_PAYEE : undefined);
+// Pay only the account we expect. For the official deployment of this network it is pinned by default.
+const official = officialDeployment(IS_MAINNET);
+const expectedPayee = process.env.EXPECTED_PAYEE || (official.apiUrl && API_URL === official.apiUrl ? official.payee : undefined);
 
 try {
   const client = createStampClient({

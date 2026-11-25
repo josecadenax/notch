@@ -3,37 +3,39 @@ import { resolve } from "node:path";
 import { sha256File } from "./hash.js";
 import { verifyStamp } from "./verifier.js";
 import { createStampClient, assertSafeApiUrl, NotchError } from "./stamp-client.js";
-import { PUBLIC_API_URL, PUBLIC_PAYEE, PUBLIC_STAMPER, PRICE, networkSettings } from "./config.js";
+import { PRICE, networkSettings, OFFICIAL, officialDeployment } from "./config.js";
 
 // Reads the MCP server settings from environment variables.
-// The public testnet deployment is pinned by default (payee and stamper); any other API needs its own pin.
-// On mainnet there is no default API: you must name it and its payee.
-export function readSettings(env = process.env) {
+// The official deployment of the current network is pinned by default (payee and stamper); any other API
+// needs its own pin. Where there is no official deployment yet (mainnet today) you must name the API and its payee.
+export function readSettings(env = process.env, official = OFFICIAL) {
   const { isMainnet, label } = networkSettings(env);
-  const apiUrl = (env.NOTCH_API_URL || (isMainnet ? "" : PUBLIC_API_URL)).replace(/\/+$/, "");
-  const isPublic = !isMainnet && apiUrl === PUBLIC_API_URL;
+  const deployment = officialDeployment(isMainnet, official);
+  const apiUrl = (env.NOTCH_API_URL || deployment.apiUrl).replace(/\/+$/, "");
+  const isOfficial = Boolean(deployment.apiUrl) && apiUrl === deployment.apiUrl;
   return {
     network: label,
     isMainnet,
     secret: env.AGENT_SECRET,
     apiUrl,
     spendCap: env.SPEND_CAP || "$0.02",
-    expectedPayee: env.EXPECTED_PAYEE || (isPublic ? PUBLIC_PAYEE : undefined),
-    stamperPublic: env.NOTCH_STAMPER || (isPublic ? PUBLIC_STAMPER : undefined),
+    expectedPayee: env.EXPECTED_PAYEE || (isOfficial ? deployment.payee : undefined),
+    stamperPublic: env.NOTCH_STAMPER || (isOfficial ? deployment.stamper : undefined),
   };
 }
 
 // Everything a mainnet user still has to set, all at once, so they edit the config and restart Claude
 // Desktop one time instead of discovering the missing pieces one error at a time.
 // Testnet needs nothing beyond AGENT_SECRET, which the stamp client already explains.
-export function mainnetSetupProblems(env = process.env) {
+export function mainnetSetupProblems(env = process.env, official = OFFICIAL) {
   const { isMainnet, sorobanRpcUrl } = networkSettings(env);
   if (!isMainnet) return [];
+  const settings = readSettings(env, official);
   const missing = [];
   if (!env.AGENT_SECRET) missing.push(["AGENT_SECRET", "the secret key of the wallet that pays (a dedicated wallet with a small balance)"]);
   if (env.NOTCH_ALLOW_MAINNET !== "1") missing.push(["NOTCH_ALLOW_MAINNET", 'set it to "1" to confirm you are using REAL money']);
-  if (!env.NOTCH_API_URL) missing.push(["NOTCH_API_URL", "the Notch API you want to use. There is no default on mainnet"]);
-  if (!env.EXPECTED_PAYEE) missing.push(["EXPECTED_PAYEE", "the Stellar account that must receive the payment, so a fake API cannot charge you"]);
+  if (!settings.apiUrl) missing.push(["NOTCH_API_URL", "the Notch API you want to use. There is no default on mainnet"]);
+  if (!settings.expectedPayee) missing.push(["EXPECTED_PAYEE", "the Stellar account that must receive the payment, so a fake API cannot charge you"]);
   if (!sorobanRpcUrl) missing.push(["SOROBAN_RPC_URL", "a Soroban RPC from a provider (Stellar runs none for mainnet): the paying client asks it to simulate the payment"]);
   return missing;
 }
@@ -68,11 +70,12 @@ export function createNotchTools({
   createClient = createStampClient,
   verifyFn = verifyStamp,
   fetchFn = fetch,
+  official = OFFICIAL,
 } = {}) {
-  const settings = readSettings(env);
+  const settings = readSettings(env, official);
   let client;
   const getClient = () => {
-    const missing = mainnetSetupProblems(env);
+    const missing = mainnetSetupProblems(env, official);
     if (missing.length) throw new NotchError("SETUP_INCOMPLETE", mainnetSetupMessage(missing));
     if (!settings.apiUrl) {
       throw new NotchError("NO_API_URL", "Set NOTCH_API_URL: there is no default API on mainnet.");

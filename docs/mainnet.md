@@ -25,8 +25,7 @@ Without both, the server, the CLI and the MCP server refuse to run on mainnet.
 
 - The OpenZeppelin **mainnet** facilitator has not been tried. Whether it lists `exact` on `stellar:pubnet` can be checked for free once you have a mainnet key (step 1).
 - Its daily fee limit on mainnet, terms and any SLA are unknown. Ask OpenZeppelin.
-- A tool to add the USDC trustline is not written yet. A wallet app can do it meanwhile.
-- No second Railway service exists yet.
+- No second Railway service exists yet, and the official mainnet API and payee are not filled in (`OFFICIAL.mainnet` in `src/config.js`), so users must name them for now.
 
 ## The Soroban RPC: what it is and what users must do
 
@@ -87,13 +86,26 @@ Then:
   STELLAR_NETWORK=pubnet FACILITATOR_API_KEY=<mainnet key> npm run facilitator:check
   ```
 
-### 2. Fund the accounts (you, with your own wallet or exchange)
+### 2. Fund the accounts and add the trustlines
 
-Send the XLM to the three public addresses, add the USDC trustline to the payee and the agent, and send USDC to the agent. Notch cannot and should not do this for you. Check the result, read-only:
+You send the XLM yourself (from your wallet or exchange) to the three public addresses. Each account needs its 1 XLM base reserve to exist, plus 0.5 XLM for each trustline. Notch cannot and should not move your money.
+
+Then the USDC trustline, on the payee and on the agent. The script only shows what it would do unless you add `--yes`, and it reads the secret from a variable, never from the command line:
+
+```bash
+export STELLAR_NETWORK=pubnet NOTCH_ALLOW_MAINNET=1
+node --env-file=.env.mainnet partes/josecadenax/scripts/add-trustline.js PAYEE_SECRET          # shows the plan
+node --env-file=.env.mainnet partes/josecadenax/scripts/add-trustline.js PAYEE_SECRET --yes    # does it
+node --env-file=.env.mainnet-agent partes/josecadenax/scripts/add-trustline.js AGENT_SECRET --yes
+```
+
+Finally send USDC to the agent. Check everything, read-only:
 
 ```bash
 STELLAR_NETWORK=pubnet node --env-file=.env.mainnet --env-file-if-exists=.env.mainnet-agent partes/josecadenax/scripts/check-accounts.js
 ```
+
+It must say `All good.` before you go on.
 
 ### 3. First real stamp, locally
 
@@ -101,9 +113,13 @@ Run the server on your machine with the mainnet settings (the facilitator key, `
 
 ### 4. Deploy
 
-A **second** Railway service, separate from the testnet one, with its own volume. Variables: `STELLAR_NETWORK=pubnet`, `NOTCH_ALLOW_MAINNET=1`, `PAYEE_PUBLIC`, `STAMPER_PUBLIC`, `STAMPER_SECRET`, `FACILITATOR_API_KEY`, `TRUST_PROXY=1`, `REGISTRY_PATH=/data/stamps.json`. Never `PAYEE_SECRET` or `AGENT_SECRET`.
+Deploy from a branch, not from `main`, until the mainnet code is merged. A **second** Railway service, separate from the testnet one, with its own volume. Variables: `STELLAR_NETWORK=pubnet`, `NOTCH_ALLOW_MAINNET=1`, `PAYEE_PUBLIC`, `STAMPER_PUBLIC`, `STAMPER_SECRET`, `FACILITATOR_API_KEY`, `TRUST_PROXY=1`, `REGISTRY_PATH=/data/stamps.json`. Never `PAYEE_SECRET` or `AGENT_SECRET`.
 
-### 5. Open it up
+### 5. Make the official deployment official
+
+Once the mainnet API is live, fill in `OFFICIAL.mainnet` in `src/config.js` with its public URL, the payee and the stamper (public keys only). From then on users of that API set neither `NOTCH_API_URL` nor `EXPECTED_PAYEE`: the client pins them by default, as it does on testnet. Publish the same payee in the README so anyone can compare it with Stellar Expert.
+
+### 6. Open it up
 
 Publish the mainnet API URL and payee so users can pin them (`NOTCH_API_URL`, `EXPECTED_PAYEE`), say clearly what a stamp proves (existence and date, not authorship or legal validity), and start with a low limit of stamps per day until you know how the facilitator behaves.
 
