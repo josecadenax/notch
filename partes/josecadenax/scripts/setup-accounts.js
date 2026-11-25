@@ -9,9 +9,12 @@
 //                                                                 payee and stamper only, for a deployed server
 //   npm run setup:accounts -- --agent-only                       only the paying wallet, into .env.agent
 //                                                                 (for people who just use the CLI or the MCP server)
+//   npm run setup:accounts -- --stamper-only                     only the account that signs stamps, into .env.stamper
+//                                                                 (when the payee is a wallet you already have, e.g. Freighter)
 //   npm run setup:accounts -- --keys-only                        MAINNET: only generates keys, no network, no funding
 //                                                                 (payee and stamper into .env.mainnet; add --agent-only for
-//                                                                 a paying wallet into .env.mainnet-agent). You fund them yourself.
+//                                                                 a paying wallet into .env.mainnet-agent, or --stamper-only for
+//                                                                 just the stamper into .env.mainnet-stamper). You fund them yourself.
 import { Keypair, Horizon, TransactionBuilder, Operation, Asset, BASE_FEE } from "@stellar/stellar-sdk";
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { HORIZON_URL, NETWORK_PASSPHRASE, USDC, EXPLORER_TX_URL, IS_MAINNET } from "../src/config.js";
@@ -22,19 +25,24 @@ const AGENT_USDC = "1";
 const args = process.argv.slice(2);
 const serverOnly = args.includes("--server-only");
 const agentOnly = args.includes("--agent-only");
-if (serverOnly && agentOnly) throw new Error("Use --server-only or --agent-only, not both");
+const stamperOnly = args.includes("--stamper-only");
+if ([serverOnly, agentOnly, stamperOnly].filter(Boolean).length > 1) {
+  throw new Error("Use only one of --server-only, --agent-only or --stamper-only");
+}
 const keysOnly = args.includes("--keys-only");
 if (IS_MAINNET && !keysOnly) {
   console.log("There is no Friendbot on mainnet, so accounts cannot be created and funded for you.");
   console.log("Run with --keys-only to generate the keys offline, then fund the public addresses yourself. See docs/mainnet.md.");
   process.exit(1);
 }
-const defaultOut = keysOnly ? (agentOnly ? ".env.mainnet-agent" : ".env.mainnet") : agentOnly ? ".env.agent" : ".env";
+const defaultOut = keysOnly
+  ? agentOnly ? ".env.mainnet-agent" : stamperOnly ? ".env.mainnet-stamper" : ".env.mainnet"
+  : agentOnly ? ".env.agent" : stamperOnly ? ".env.stamper" : ".env";
 const outFile = args.includes("--out") ? args[args.indexOf("--out") + 1] : defaultOut;
 if (!outFile) throw new Error("--out needs a path");
 
 // Never overwrite keys that already exist: losing a secret means losing the money in that wallet.
-const existingKeys = agentOnly ? /^AGENT_SECRET=\S/m : /^(PAYEE_PUBLIC|STAMPER_SECRET|AGENT_SECRET)=\S/m;
+const existingKeys = agentOnly ? /^AGENT_SECRET=\S/m : stamperOnly ? /^STAMPER_SECRET=\S/m : /^(PAYEE_PUBLIC|STAMPER_SECRET|AGENT_SECRET)=\S/m;
 if (existsSync(outFile) && existingKeys.test(readFileSync(outFile, "utf8"))) {
   console.log(`Accounts already configured in ${outFile}. Delete those lines to start over.`);
   process.exit(0);
@@ -62,10 +70,10 @@ async function fundedAccount(label, { usdcTrustline }) {
   return keypair;
 }
 
-const payee = agentOnly ? null : await fundedAccount("payee  ", { usdcTrustline: true });
+const payee = agentOnly || stamperOnly ? null : await fundedAccount("payee  ", { usdcTrustline: true });
 const stamper = agentOnly ? null : await fundedAccount("stamper", { usdcTrustline: false });
-// The paying wallet is made unless only the server is wanted. With --keys-only (mainnet) it is opt-in.
-const wantAgent = agentOnly || (!serverOnly && !keysOnly);
+// The paying wallet is made unless only the server or only the stamper is wanted. With --keys-only (mainnet) it is opt-in.
+const wantAgent = agentOnly || (!serverOnly && !stamperOnly && !keysOnly);
 let agent = null;
 if (wantAgent) {
   agent = await fundedAccount("agent  ", { usdcTrustline: true });
@@ -111,7 +119,11 @@ if (keysOnly) {
   console.log("\nNothing was sent to the network. These addresses do not exist on the ledger until you fund them.");
   console.log("Fund each one with a little XLM, then run: npm run accounts:check (see docs/mainnet.md).");
   console.log("Back up the secrets. If you lose a secret you lose the money in that account.");
+  if (stamperOnly) console.log("Put STAMPER_PUBLIC and STAMPER_SECRET on the server. PAYEE_PUBLIC is the address of the wallet that receives the money.");
   if (payee) console.log("PAYEE_SECRET is needed to withdraw what the payee earns. Keep it offline: do NOT put it in Railway.");
+} else if (stamperOnly) {
+  console.log(`\nYour stamper: ${stamper.publicKey()}`);
+  console.log("Put STAMPER_PUBLIC and STAMPER_SECRET on the server. PAYEE_PUBLIC is the address of the wallet that receives the money.");
 } else if (agentOnly) {
   console.log(`\nYour paying wallet: ${agent.publicKey()}`);
   console.log(`Next: put the AGENT_SECRET line of ${outFile} in your MCP client settings. See docs/mcp.md.`);

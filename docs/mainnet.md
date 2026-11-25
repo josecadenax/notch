@@ -69,10 +69,23 @@ As a first, minimal funding, think in terms of: payee about 2 XLM, stamper about
 
 ### 1. Prepare (no money moves)
 
-```bash
-STELLAR_NETWORK=pubnet npm run setup:accounts -- --keys-only            # payee and stamper into .env.mainnet
-STELLAR_NETWORK=pubnet npm run setup:accounts -- --keys-only --agent-only   # your paying wallet into .env.mainnet-agent
-```
+Decide where the **payee** lives. It is the account that receives the money, and the server only needs its public address.
+
+- **A wallet you already have, such as Freighter (recommended).** The secret stays in the wallet and never goes into a file or onto a server. Switch Freighter to mainnet, copy the address of an account and use it as `PAYEE_PUBLIC`. Add the USDC asset from Freighter (that creates the trustline) and withdraw from Freighter when you want. Then you only generate the stamper and the agent:
+
+  ```bash
+  STELLAR_NETWORK=pubnet npm run setup:accounts -- --keys-only --stamper-only   # stamper into .env.mainnet-stamper
+  STELLAR_NETWORK=pubnet npm run setup:accounts -- --keys-only --agent-only     # your paying wallet into .env.mainnet-agent
+  ```
+
+- **A new account made here.** It also saves `PAYEE_SECRET` in a file, which you must keep offline:
+
+  ```bash
+  STELLAR_NETWORK=pubnet npm run setup:accounts -- --keys-only                  # payee and stamper into .env.mainnet
+  STELLAR_NETWORK=pubnet npm run setup:accounts -- --keys-only --agent-only
+  ```
+
+Use dedicated accounts for the stamper and the agent, never your main wallet: the stamper's secret lives on the server and the agent's in Claude Desktop's config, so each should hold only what you can afford to lose.
 
 This generates keys offline and prints the public addresses. **Back up the secrets in a password manager now.** Losing one means losing what is in that account.
 
@@ -90,7 +103,7 @@ Then:
 
 You send the XLM yourself (from your wallet or exchange) to the three public addresses. Each account needs its 1 XLM base reserve to exist, plus 0.5 XLM for each trustline. Notch cannot and should not move your money.
 
-Then the USDC trustline, on the payee and on the agent. The script only shows what it would do unless you add `--yes`, and it reads the secret from a variable, never from the command line:
+Then the USDC trustline, on the payee and on the agent. If the payee is a Freighter account, add the USDC asset from Freighter instead and skip it below. The script only shows what it would do unless you add `--yes`, and it reads the secret from a variable, never from the command line:
 
 ```bash
 export STELLAR_NETWORK=pubnet NOTCH_ALLOW_MAINNET=1
