@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/logo/notch-logo-256.png" alt="Notch logo" width="160" height="160">
+</p>
+
 # Notch
 
 [![Tests](https://github.com/josecadenax/notch/actions/workflows/test.yml/badge.svg)](https://github.com/josecadenax/notch/actions/workflows/test.yml)
