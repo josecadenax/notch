@@ -1,10 +1,10 @@
 import { paymentMiddlewareFromConfig } from "@x402/express";
-import { HTTPFacilitatorClient } from "@x402/core/server";
 import { ExactStellarScheme } from "@x402/stellar/exact/server";
 import { createApp } from "./app.js";
 import { createStamper } from "./stamper.js";
 import { createFileRegistry } from "./registry.js";
 import { createRateLimiter } from "./rate-limit.js";
+import { createFacilitator, missingApiKey } from "./facilitator.js";
 import { PORT, PRICE, NETWORK, FACILITATOR_URL } from "./config.js";
 
 const { PAYEE_PUBLIC, STAMPER_SECRET } = process.env;
@@ -13,10 +13,16 @@ if (!PAYEE_PUBLIC || !STAMPER_SECRET) {
   process.exit(1);
 }
 
+const { FACILITATOR_API_KEY } = process.env;
+if (missingApiKey({ url: FACILITATOR_URL, apiKey: FACILITATOR_API_KEY })) {
+  console.error("This facilitator needs FACILITATOR_API_KEY. Create one at https://channels.openzeppelin.com");
+  process.exit(1);
+}
+
 // x402: without payment, POST /stamp answers 402 with the instructions to pay.
 const payment = paymentMiddlewareFromConfig(
   { "POST /stamp": { accepts: { scheme: "exact", price: PRICE, network: NETWORK, payTo: PAYEE_PUBLIC } } },
-  new HTTPFacilitatorClient({ url: FACILITATOR_URL }),
+  createFacilitator({ url: FACILITATOR_URL, apiKey: FACILITATOR_API_KEY }),
   [{ network: NETWORK, server: new ExactStellarScheme() }],
 );
 
