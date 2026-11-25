@@ -1,5 +1,7 @@
 # Notch
 
+[![Tests](https://github.com/josecadenax/notch/actions/workflows/test.yml/badge.svg)](https://github.com/josecadenax/notch/actions/workflows/test.yml)
+
 **Pay-per-use timestamps for AI agents, on Stellar.**
 
 An agent hashes what it produced, pays 0.01 USDC with x402, and Notch anchors that hash in a Stellar transaction. From then on, anyone can prove for free that the document existed no later than that date.
