@@ -5,8 +5,16 @@ import { PRICE, NETWORK, EXPLORER_TX_URL } from "./config.js";
 
 // Builds the Express app. `payment` is the x402 middleware that charges POST /stamp;
 // tests pass nothing and exercise the handlers directly.
-export function createApp({ stamper, registry, payment = null, verifyFn = verifyStamp }) {
+export function createApp({
+  stamper,
+  registry,
+  payment = null,
+  verifyFn = verifyStamp,
+  limiter = (_req, _res, next) => next(), // rate limit for the free endpoints
+  trustProxy = false, // set to 1 behind one reverse proxy, so req.ip and https are the real ones
+}) {
   const app = express();
+  if (trustProxy) app.set("trust proxy", trustProxy);
   app.use(express.json());
 
   // Public info: what the API does, what it costs and on which network.
@@ -46,12 +54,12 @@ export function createApp({ stamper, registry, payment = null, verifyFn = verify
     }
   });
 
-  app.get("/stamp/:hash", (req, res) => {
+  app.get("/stamp/:hash", limiter, (req, res) => {
     const stamp = registry.get(req.params.hash);
     return stamp ? res.json(stamp) : res.status(404).json({ error: "no stamp for this hash" });
   });
 
-  app.get("/verify", async (req, res) => {
+  app.get("/verify", limiter, async (req, res) => {
     const hash = req.query.hash;
     const tx = req.query.tx || registry.get(hash)?.tx;
     try {
