@@ -2,8 +2,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { Keypair, Networks } from "@stellar/stellar-sdk";
 import { USDC_PUBNET_ADDRESS, USDC_TESTNET_ADDRESS } from "@x402/stellar";
-import { networkSettings, mainnetBlocker } from "../src/config.js";
+import { networkSettings, mainnetBlocker, OFFICIAL } from "../src/config.js";
 import { createStampClient } from "../src/stamp-client.js";
+// A deployment with nothing official on mainnet: what a fork or a new network looks like.
+const NO_OFFICIAL = { ...OFFICIAL, mainnet: { apiUrl: "", payee: "", stamper: "" } };
 import { createNotchTools, readSettings, mainnetSetupProblems, mainnetSetupMessage } from "../src/mcp-tools.js";
 
 test("networkSettings: testnet is the default and is what runs today", () => {
@@ -89,7 +91,7 @@ test("stamp client on mainnet: refuses a testnet payment request before signing"
 });
 
 test("MCP settings on mainnet: no default API and no default pins, you must name them", () => {
-  const s = readSettings({ STELLAR_NETWORK: "pubnet", AGENT_SECRET: "S" });
+  const s = readSettings({ STELLAR_NETWORK: "pubnet", AGENT_SECRET: "S" }, NO_OFFICIAL);
   assert.equal(s.isMainnet, true);
   assert.equal(s.apiUrl, "");
   assert.equal(s.expectedPayee, undefined);
@@ -99,6 +101,7 @@ test("MCP settings on mainnet: no default API and no default pins, you must name
 test("MCP tools on mainnet: a half-configured user gets ALL missing settings in one message, and nothing is sent", async () => {
   const tools = createNotchTools({
     env: { STELLAR_NETWORK: "pubnet", AGENT_SECRET: "S" },
+    official: NO_OFFICIAL,
     fetchFn: async () => assert.fail("no request should be made"),
   });
   for (const run of [tools.checkBalance(), tools.stampFile({ path: "/does/not/matter" })]) {
@@ -114,19 +117,19 @@ test("MCP tools on mainnet: a half-configured user gets ALL missing settings in 
 });
 
 test("mainnetSetupProblems: lists exactly what is missing, nothing on testnet, nothing when complete", () => {
-  assert.deepEqual(mainnetSetupProblems({}), [], "testnet needs nothing here");
-  assert.deepEqual(mainnetSetupProblems({ AGENT_SECRET: "S" }), []);
+  assert.deepEqual(mainnetSetupProblems({}, NO_OFFICIAL), [], "testnet needs nothing here");
+  assert.deepEqual(mainnetSetupProblems({ AGENT_SECRET: "S" }, NO_OFFICIAL), []);
   assert.deepEqual(
-    mainnetSetupProblems({ STELLAR_NETWORK: "pubnet" }).map(([name]) => name),
+    mainnetSetupProblems({ STELLAR_NETWORK: "pubnet" }, NO_OFFICIAL).map(([name]) => name),
     ["AGENT_SECRET", "NOTCH_ALLOW_MAINNET", "NOTCH_API_URL", "EXPECTED_PAYEE", "SOROBAN_RPC_URL"],
   );
   const complete = { STELLAR_NETWORK: "pubnet", AGENT_SECRET: "S", NOTCH_ALLOW_MAINNET: "1", NOTCH_API_URL: "https://api.example.com", EXPECTED_PAYEE: "G", SOROBAN_RPC_URL: "https://rpc.example" };
-  assert.deepEqual(mainnetSetupProblems(complete), []);
-  assert.equal(mainnetSetupProblems({ ...complete, NOTCH_ALLOW_MAINNET: "yes" }).length, 1, "only exactly 1 confirms");
+  assert.deepEqual(mainnetSetupProblems(complete, NO_OFFICIAL), []);
+  assert.equal(mainnetSetupProblems({ ...complete, NOTCH_ALLOW_MAINNET: "yes" }, NO_OFFICIAL).length, 1, "only exactly 1 confirms");
 });
 
 test("mainnetSetupMessage: gives a block to paste, with the confirmation already filled in", () => {
-  const message = mainnetSetupMessage(mainnetSetupProblems({ STELLAR_NETWORK: "pubnet" }));
+  const message = mainnetSetupMessage(mainnetSetupProblems({ STELLAR_NETWORK: "pubnet" }, NO_OFFICIAL));
   const block = JSON.parse(message.slice(message.indexOf("{"), message.lastIndexOf("}") + 1));
   assert.equal(block.STELLAR_NETWORK, "pubnet");
   assert.equal(block.NOTCH_ALLOW_MAINNET, "1");
@@ -142,4 +145,12 @@ test("MCP check_balance: says which network and whether the money is real", asyn
     createClient: () => fake,
   }).checkBalance();
   assert.match(real.text, /Network: mainnet \(REAL money\)/);
+});
+
+test("the real official mainnet deployment is pinned, so its users only need a key, the opt-in and an RPC", () => {
+  const env = { STELLAR_NETWORK: "pubnet", AGENT_SECRET: "S" };
+  assert.deepEqual(mainnetSetupProblems(env).map(([name]) => name), ["NOTCH_ALLOW_MAINNET", "SOROBAN_RPC_URL"]);
+  const s = readSettings(env);
+  assert.match(s.apiUrl, /^https:\/\//);
+  assert.match(s.expectedPayee, /^G[A-Z2-7]{55}$/);
 });

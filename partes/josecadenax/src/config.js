@@ -79,10 +79,13 @@ export const PUBLIC_STAMPER = "GCLUSRU43N2QAIL54A7CYXDRDQ4KGS4DI3RZTF7ORQUZWNV6U
 
 export const OFFICIAL = {
   testnet: { apiUrl: PUBLIC_API_URL, payee: PUBLIC_PAYEE, stamper: PUBLIC_STAMPER },
-  // Fill these in the day the official mainnet API is live. While they are empty, nothing is assumed
-  // on mainnet and the user must name the API and its payee. Once filled, users of the official API
-  // need to set neither of them. The values are public keys and a URL, never secrets.
-  mainnet: { apiUrl: "", payee: "", stamper: "" },
+  // The official mainnet deployment (live since 25 Nov 2026). Public keys and a URL, never secrets.
+  // Clients pin them, so users of the official API set neither NOTCH_API_URL nor EXPECTED_PAYEE.
+  mainnet: {
+    apiUrl: "https://zestful-mercy-production-31bdd567.up.railway.app",
+    payee: "GD6QIPHGOHOCPCWUCR3CLLN54FXWLDU3JJACQRTIQCA4YK4RDU5IPHRW",
+    stamper: "GBCA6ESEFFROJKVSV2CO5UCLFTXK2RYFRNLNTNODSA7HAXXMXDDXWUB6",
+  },
 };
 
 // The official deployment for the current network (empty strings when there is none).

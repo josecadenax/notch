@@ -49,10 +49,12 @@ test("buildTrustlineTransaction: one changeTrust for the asset, signed for the r
   }
 });
 
-test("officialDeployment: testnet has one and mainnet has none yet", () => {
+test("officialDeployment: both networks have an official deployment with public keys only", () => {
   assert.equal(officialDeployment(false).apiUrl, PUBLIC_API_URL);
   assert.equal(officialDeployment(false).payee, PUBLIC_PAYEE);
-  assert.deepEqual(officialDeployment(true), { apiUrl: "", payee: "", stamper: "" }, "fill it in when the mainnet API is live");
+  const main = officialDeployment(true);
+  assert.match(main.apiUrl, /^https:\/\//);
+  for (const key of [main.payee, main.stamper]) assert.match(key, /^G[A-Z2-7]{55}$/, "a public key, never a secret");
 });
 
 const FILLED = { ...OFFICIAL, mainnet: { apiUrl: "https://notch.example.com", payee: Keypair.random().publicKey(), stamper: Keypair.random().publicKey() } };
@@ -75,7 +77,7 @@ test("someone else's mainnet server gets no pin from the official one, so they m
 
 test("while the mainnet slot is empty nothing is assumed", () => {
   assert.deepEqual(
-    mainnetSetupProblems(MAINNET_ENV).map(([name]) => name),
+    mainnetSetupProblems(MAINNET_ENV, { ...OFFICIAL, mainnet: { apiUrl: "", payee: "", stamper: "" } }).map(([name]) => name),
     ["NOTCH_API_URL", "EXPECTED_PAYEE"],
   );
 });

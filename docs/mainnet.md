@@ -16,16 +16,28 @@ Without both, the server, the CLI and the MCP server refuse to run on mainnet.
 | Network, passphrase, Horizon, USDC, explorer | Switch together with `STELLAR_NETWORK`. The USDC asset is checked in tests against the contract `@x402/stellar` uses |
 | Facilitator | Defaults to `https://channels.openzeppelin.com/x402` and the server refuses to start without `FACILITATOR_API_KEY` |
 | Soroban RPC | The paying client needs `SOROBAN_RPC_URL`. SDF runs no public one for mainnet, so there is no default and the client refuses to start without it |
-| API and payee pins | No default. You must set `NOTCH_API_URL` and `EXPECTED_PAYEE`. The testnet public API is never used by mistake |
+| API and payee pins | The official mainnet API and payee are pinned by default (see [Live deployment](#live-deployment)). Another server needs `NOTCH_API_URL` and `EXPECTED_PAYEE`. The testnet public API is never used by mistake |
 | Payment network | The client refuses any request that is not `stellar:pubnet` before signing |
 | Accounts | `setup:accounts` will not create or fund accounts on mainnet (no Friendbot). `--keys-only` makes keys offline |
 | Messages | `check_balance` and the server say which network they are on and whether the money is real |
 
+## Live deployment
+
+Since 25 Nov 2026 there is an official mainnet API on Railway, a second service next to the testnet one, with its own volume.
+
+| | |
+|---|---|
+| API | `https://zestful-mercy-production-31bdd567.up.railway.app` |
+| Payee (receives the 0.01 USDC) | `GD6QIPHGOHOCPCWUCR3CLLN54FXWLDU3JJACQRTIQCA4YK4RDU5IPHRW` |
+| Stamper (signs the stamp) | `GBCA6ESEFFROJKVSV2CO5UCLFTXK2RYFRNLNTNODSA7HAXXMXDDXWUB6` |
+
+Compare the payee with Stellar Expert before paying. The first real stamps were made on this network: [stamp](https://stellar.expert/explorer/public/tx/0c157854ad4253bac48f768063ae9bea05f43d4a8cdaaf1c973193d4c6082bd9) and its [payment](https://stellar.expert/explorer/public/tx/4c7925bcdd9ff4e4355138c621391a70d786bc2e36073ce11d1f41d58dec7bc0).
+
 ## What is NOT done or not verified
 
-- The OpenZeppelin **mainnet** facilitator has not been tried. Whether it lists `exact` on `stellar:pubnet` can be checked for free once you have a mainnet key (step 1).
-- Its daily fee limit on mainnet, terms and any SLA are unknown. Ask OpenZeppelin.
-- No second Railway service exists yet, and the official mainnet API and payee are not filled in (`OFFICIAL.mainnet` in `src/config.js`), so users must name them for now.
+- OpenZeppelin's daily fee limit on mainnet, terms and any SLA are unknown. Ask them.
+- One early settlement answered 402 although the payment went through on the network (one stamp, charged once). It did not happen again in two more tries. The server now logs how every settlement ends (`[facilitator]` lines), so the next one will leave the reason.
+- No limit of stamps per day is enforced beyond the per-minute rate limit.
 
 ## The Soroban RPC: what it is and what users must do
 
