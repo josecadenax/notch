@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { createNotchTools } from "./mcp-tools.js";
+import { createNotchTools, mainnetSetupProblems, mainnetSetupMessage } from "./mcp-tools.js";
 
 // Notch MCP server (stdio). Claude Desktop starts it as a local process on the user's machine.
 // stdout belongs to the protocol: log only to stderr.
@@ -54,4 +54,5 @@ server.registerTool(
 );
 
 await server.connect(new StdioServerTransport());
-console.error("Notch MCP server ready");
+const missing = mainnetSetupProblems();
+console.error(missing.length ? mainnetSetupMessage(missing) : "Notch MCP server ready");

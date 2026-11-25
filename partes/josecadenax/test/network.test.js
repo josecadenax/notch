@@ -4,7 +4,7 @@ import { Keypair, Networks } from "@stellar/stellar-sdk";
 import { USDC_PUBNET_ADDRESS, USDC_TESTNET_ADDRESS } from "@x402/stellar";
 import { networkSettings, mainnetBlocker } from "../src/config.js";
 import { createStampClient } from "../src/stamp-client.js";
-import { createNotchTools, readSettings } from "../src/mcp-tools.js";
+import { createNotchTools, readSettings, mainnetSetupProblems, mainnetSetupMessage } from "../src/mcp-tools.js";
 
 test("networkSettings: testnet is the default and is what runs today", () => {
   const s = networkSettings({});
@@ -96,14 +96,41 @@ test("MCP settings on mainnet: no default API and no default pins, you must name
   assert.equal(s.stamperPublic, undefined);
 });
 
-test("MCP tools on mainnet: stamping without naming an API says what to set, and sends nothing", async () => {
+test("MCP tools on mainnet: a half-configured user gets ALL missing settings in one message, and nothing is sent", async () => {
   const tools = createNotchTools({
-    env: { STELLAR_NETWORK: "pubnet", AGENT_SECRET: "S", NOTCH_ALLOW_MAINNET: "1" },
+    env: { STELLAR_NETWORK: "pubnet", AGENT_SECRET: "S" },
     fetchFn: async () => assert.fail("no request should be made"),
   });
-  const result = await tools.checkBalance();
-  assert.equal(result.isError, true);
-  assert.match(result.text, /NO_API_URL/);
+  for (const run of [tools.checkBalance(), tools.stampFile({ path: "/does/not/matter" })]) {
+    const result = await run;
+    assert.equal(result.isError, true);
+    assert.match(result.text, /SETUP_INCOMPLETE/);
+    for (const name of ["NOTCH_ALLOW_MAINNET", "NOTCH_API_URL", "EXPECTED_PAYEE", "SOROBAN_RPC_URL"]) {
+      assert.match(result.text, new RegExp(name), `${name} is listed`);
+    }
+    assert.doesNotMatch(result.text, /AGENT_SECRET:/, "what is already set is not asked again");
+    assert.match(result.text, /Cmd\+Q/, "it says to restart Claude Desktop");
+  }
+});
+
+test("mainnetSetupProblems: lists exactly what is missing, nothing on testnet, nothing when complete", () => {
+  assert.deepEqual(mainnetSetupProblems({}), [], "testnet needs nothing here");
+  assert.deepEqual(mainnetSetupProblems({ AGENT_SECRET: "S" }), []);
+  assert.deepEqual(
+    mainnetSetupProblems({ STELLAR_NETWORK: "pubnet" }).map(([name]) => name),
+    ["AGENT_SECRET", "NOTCH_ALLOW_MAINNET", "NOTCH_API_URL", "EXPECTED_PAYEE", "SOROBAN_RPC_URL"],
+  );
+  const complete = { STELLAR_NETWORK: "pubnet", AGENT_SECRET: "S", NOTCH_ALLOW_MAINNET: "1", NOTCH_API_URL: "https://api.example.com", EXPECTED_PAYEE: "G", SOROBAN_RPC_URL: "https://rpc.example" };
+  assert.deepEqual(mainnetSetupProblems(complete), []);
+  assert.equal(mainnetSetupProblems({ ...complete, NOTCH_ALLOW_MAINNET: "yes" }).length, 1, "only exactly 1 confirms");
+});
+
+test("mainnetSetupMessage: gives a block to paste, with the confirmation already filled in", () => {
+  const message = mainnetSetupMessage(mainnetSetupProblems({ STELLAR_NETWORK: "pubnet" }));
+  const block = JSON.parse(message.slice(message.indexOf("{"), message.lastIndexOf("}") + 1));
+  assert.equal(block.STELLAR_NETWORK, "pubnet");
+  assert.equal(block.NOTCH_ALLOW_MAINNET, "1");
+  assert.equal(block.SOROBAN_RPC_URL, "...");
 });
 
 test("MCP check_balance: says which network and whether the money is real", async () => {
@@ -111,7 +138,7 @@ test("MCP check_balance: says which network and whether the money is real", asyn
   const test_ = await createNotchTools({ env: { AGENT_SECRET: "S" }, createClient: () => fake }).checkBalance();
   assert.match(test_.text, /Network: testnet \(test money\)/);
   const real = await createNotchTools({
-    env: { STELLAR_NETWORK: "pubnet", AGENT_SECRET: "S", NOTCH_API_URL: "https://api.example.com", EXPECTED_PAYEE: Keypair.random().publicKey() },
+    env: { STELLAR_NETWORK: "pubnet", AGENT_SECRET: "S", NOTCH_ALLOW_MAINNET: "1", SOROBAN_RPC_URL: "https://rpc.example", NOTCH_API_URL: "https://api.example.com", EXPECTED_PAYEE: Keypair.random().publicKey() },
     createClient: () => fake,
   }).checkBalance();
   assert.match(real.text, /Network: mainnet \(REAL money\)/);

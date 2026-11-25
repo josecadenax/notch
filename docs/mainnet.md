@@ -28,6 +28,32 @@ Without both, the server, the CLI and the MCP server refuse to run on mainnet.
 - A tool to add the USDC trustline is not written yet. A wallet app can do it meanwhile.
 - No second Railway service exists yet.
 
+## The Soroban RPC: what it is and what users must do
+
+The paying client prepares the USDC transfer before it signs, and for that it asks a **Soroban RPC**. On every payment it makes three requests:
+
+| # | Request | Why |
+|---|---|---|
+| 1 | `getLatestLedger`: what is the current ledger? | To know until which ledger the payment authorization is valid (300 seconds is about 60 ledgers) |
+| 2 | `simulateTransaction`: would this transfer work? | The client builds a USDC `transfer` from the payer to the payee and checks that the balance and the trustline are there, and what authorization it needs |
+| 3 | `simulateTransaction` again, now signed | To confirm the transfer is still valid once the authorization is signed |
+
+A fourth request, to estimate how long a ledger takes, goes to Horizon, which is public.
+
+What the RPC does **not** do: it does not send the payment (the facilitator submits it), it never sees the secret key (the authorization is signed locally) and simulating spends nothing. If the balance or the trustline is missing, the simulation fails before anything is signed, which is a safety net.
+
+What the provider can see: the payer and payee addresses, the amount and the signed authorization. Not the secret key and not your files (only a hash goes to Notch, and not to the RPC). On mainnet, pick a provider you trust.
+
+**On testnet users do nothing:** SDF runs a free public RPC and Notch uses it. **On mainnet Stellar runs none**, so each user who pays must:
+
+1. Choose a provider with a free tier from <https://developers.stellar.org/docs/data/rpc/providers> and check its limits.
+2. Sign up and get an access URL.
+3. Put it in `SOROBAN_RPC_URL`, in the `env` block of the Notch server in Claude Desktop (see [mcp.md](mcp.md#mainnet)).
+
+Three requests per payment is very little, so a free tier is enough for normal use. The real friction is the sign-up with a third party, not the cost. Options to remove it later: a small Notch service that forwards only these requests (you would pay for the usage and have to control abuse), or nothing at all. A provider key must never be hard-coded in this public repository.
+
+How a user finds out they have to do this: if anything is missing the MCP server says so, all at once, in its log and in the answer to any tool call (see [mcp.md](mcp.md#mainnet)).
+
 ## Accounts and what each one holds
 
 | Account | Role | Needs |

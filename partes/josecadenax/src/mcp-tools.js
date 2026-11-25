@@ -23,6 +23,33 @@ export function readSettings(env = process.env) {
   };
 }
 
+// Everything a mainnet user still has to set, all at once, so they edit the config and restart Claude
+// Desktop one time instead of discovering the missing pieces one error at a time.
+// Testnet needs nothing beyond AGENT_SECRET, which the stamp client already explains.
+export function mainnetSetupProblems(env = process.env) {
+  const { isMainnet, sorobanRpcUrl } = networkSettings(env);
+  if (!isMainnet) return [];
+  const missing = [];
+  if (!env.AGENT_SECRET) missing.push(["AGENT_SECRET", "the secret key of the wallet that pays (a dedicated wallet with a small balance)"]);
+  if (env.NOTCH_ALLOW_MAINNET !== "1") missing.push(["NOTCH_ALLOW_MAINNET", 'set it to "1" to confirm you are using REAL money']);
+  if (!env.NOTCH_API_URL) missing.push(["NOTCH_API_URL", "the Notch API you want to use. There is no default on mainnet"]);
+  if (!env.EXPECTED_PAYEE) missing.push(["EXPECTED_PAYEE", "the Stellar account that must receive the payment, so a fake API cannot charge you"]);
+  if (!sorobanRpcUrl) missing.push(["SOROBAN_RPC_URL", "a Soroban RPC from a provider (Stellar runs none for mainnet): the paying client asks it to simulate the payment"]);
+  return missing;
+}
+
+export function mainnetSetupMessage(missing) {
+  const values = Object.fromEntries(missing.map(([name]) => [name, name === "NOTCH_ALLOW_MAINNET" ? "1" : "..."]));
+  return [
+    "Notch is not fully set up for mainnet (real money). Missing:",
+    ...missing.map(([name, why]) => `- ${name}: ${why}`),
+    "",
+    'Add them inside "env" of the notch server in Claude Desktop\'s config, then quit Claude Desktop (Cmd+Q) and open it again:',
+    JSON.stringify({ STELLAR_NETWORK: "pubnet", ...values }, null, 2),
+    "See docs/mcp.md, section Mainnet.",
+  ].join("\n");
+}
+
 const expandPath = (path) => resolve(path.startsWith("~/") ? path.replace("~", homedir()) : path);
 const ok = (text) => ({ text, isError: false });
 const fail = (text) => ({ text, isError: true });
@@ -45,8 +72,10 @@ export function createNotchTools({
   const settings = readSettings(env);
   let client;
   const getClient = () => {
+    const missing = mainnetSetupProblems(env);
+    if (missing.length) throw new NotchError("SETUP_INCOMPLETE", mainnetSetupMessage(missing));
     if (!settings.apiUrl) {
-      throw new NotchError("NO_API_URL", "On mainnet, set NOTCH_API_URL (and EXPECTED_PAYEE): there is no default API.");
+      throw new NotchError("NO_API_URL", "Set NOTCH_API_URL: there is no default API on mainnet.");
     }
     return (client ??= createClient({
       secret: settings.secret,

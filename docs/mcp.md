@@ -77,6 +77,38 @@ To top it up later, send test USDC to the wallet address from <https://faucet.ci
 
 Use **absolute paths** for files. Claude Desktop does not run in your project folder.
 
+## Mainnet
+
+Everything above uses testnet and test money. Mainnet uses **real money**, so it is never on by accident: you have to ask for it, name everything it needs, and there are no defaults to fall back on. The full plan is in [mainnet.md](mainnet.md).
+
+Add these to the `env` block of the `notch` server, together with your `AGENT_SECRET`:
+
+```json
+"env": {
+  "AGENT_SECRET": "S...the secret of a dedicated wallet with a small balance...",
+  "STELLAR_NETWORK": "pubnet",
+  "NOTCH_ALLOW_MAINNET": "1",
+  "NOTCH_API_URL": "https://...the mainnet Notch API...",
+  "EXPECTED_PAYEE": "G...the account that must receive the payment...",
+  "SOROBAN_RPC_URL": "https://...an RPC from your provider..."
+}
+```
+
+| Setting | What it is |
+|---|---|
+| `STELLAR_NETWORK=pubnet` | Use mainnet |
+| `NOTCH_ALLOW_MAINNET=1` | A second, explicit "yes, real money" |
+| `NOTCH_API_URL` | The Notch API to use. There is no default on mainnet |
+| `EXPECTED_PAYEE` | The only account you will pay, so a fake API cannot charge you |
+| `SOROBAN_RPC_URL` | A Soroban RPC from a provider. Stellar runs none for mainnet. See [what it is used for](mainnet.md#the-soroban-rpc-what-it-is-and-what-users-must-do) |
+
+You do not have to remember this list. If something is missing, Notch tells you **all of it at once**, with the block to paste:
+
+- when Claude Desktop starts the server, in its log (`~/Library/Logs/Claude/mcp-server-notch.log`), and
+- in the answer to any tool. For example, asking *"check my Notch balance"* answers with what is missing and says to quit Claude Desktop (Cmd+Q) and open it again. Claude will explain it to you.
+
+Once everything is set, `check_balance` shows `Network: mainnet (REAL money)`, your wallet, its balance and the only account it will pay. Start with cents.
+
 ## Settings
 
 All settings are environment variables in the `env` block above.
