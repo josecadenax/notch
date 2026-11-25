@@ -91,7 +91,7 @@ This generates keys offline and prints the public addresses. **Back up the secre
 
 Then:
 
-- Create a mainnet facilitator key at <https://channels.openzeppelin.com/gen> (GitHub login). It is shown once.
+- Create a mainnet facilitator key at <https://channels.openzeppelin.com/gen>. The docs say it asks you to sign in with GitHub, but it has also returned the key straight away. Either way it is shown once: save it right away. Which network a key is for is decided by trying it, not by the page, so run the check below.
 - Choose a Soroban RPC provider. Public ones with a free tier are listed at <https://developers.stellar.org/docs/data/rpc/providers>. Check their limits.
 - Confirm the facilitator supports mainnet, with no payment involved:
 

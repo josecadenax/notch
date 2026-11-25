@@ -80,4 +80,4 @@ If one key is not enough, the options are to ask OpenZeppelin for more capacity,
 
 ## For mainnet
 
-Mainnet needs a mainnet key (created with GitHub at <https://channels.openzeppelin.com/gen>), the mainnet URL above, and the network set to `stellar:pubnet`. The pages read did not state any SLA, terms or audit status, so ask OpenZeppelin before relying on it with real money.
+Mainnet needs a mainnet key (created at <https://channels.openzeppelin.com/gen>, which may ask for a GitHub login), the mainnet URL above, and the network set to `stellar:pubnet`. The pages read did not state any SLA, terms or audit status, so ask OpenZeppelin before relying on it with real money.
