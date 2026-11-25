@@ -154,3 +154,49 @@ test("verify_stamp: a file the server never stamped is reported, not treated as 
   assert.equal(result.isError, false);
   assert.match(result.text, /No stamp was found/);
 });
+
+test("check_balance: shows wallet, balance, stamps left and the payee it is pinned to, never a secret", async () => {
+  const tools = createNotchTools({
+    env: { AGENT_SECRET: "SECRET-SHOULD-NOT-APPEAR" },
+    createClient: () => ({ address: "GWALLET", usdcBalance: async () => 0.93 * 1e7 }),
+  });
+  const result = await tools.checkBalance();
+  assert.equal(result.isError, false);
+  assert.match(result.text, /Paying wallet: GWALLET/);
+  assert.match(result.text, /Balance: 0\.93 USDC \(about 93 stamps/);
+  assert.match(result.text, new RegExp(`Only pays to: ${PUBLIC_PAYEE}`));
+  assert.doesNotMatch(result.text, /SECRET-SHOULD-NOT-APPEAR/);
+  assert.doesNotMatch(result.text, /faucet/, "no top-up hint while there is balance");
+});
+
+test("check_balance: with too little balance it says how to top up", async () => {
+  const tools = createNotchTools({
+    env: { AGENT_SECRET: "S" },
+    createClient: () => ({ address: "GWALLET", usdcBalance: async () => 0 }),
+  });
+  const result = await tools.checkBalance();
+  assert.match(result.text, /Not enough for a stamp/);
+  assert.match(result.text, /faucet\.circle\.com/);
+  assert.match(result.text, /GWALLET/);
+});
+
+test("check_balance: without AGENT_SECRET it explains what is missing", async () => {
+  const result = await createNotchTools({ env: {} }).checkBalance();
+  assert.equal(result.isError, true);
+  assert.match(result.text, /AGENT_SECRET/);
+});
+
+test("check_balance: a wallet that does not exist yet is reported clearly", async () => {
+  const tools = createNotchTools({
+    env: { AGENT_SECRET: "S" },
+    createClient: () => ({
+      address: "GWALLET",
+      usdcBalance: async () => {
+        throw new NotchError("WALLET_NOT_FOUND", "does not exist on the network yet");
+      },
+    }),
+  });
+  const result = await tools.checkBalance();
+  assert.equal(result.isError, true);
+  assert.match(result.text, /WALLET_NOT_FOUND/);
+});

@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { sha256File } from "./hash.js";
 import { verifyStamp } from "./verifier.js";
 import { createStampClient, assertSafeApiUrl, NotchError } from "./stamp-client.js";
-import { PUBLIC_API_URL, PUBLIC_PAYEE, PUBLIC_STAMPER } from "./config.js";
+import { PUBLIC_API_URL, PUBLIC_PAYEE, PUBLIC_STAMPER, PRICE } from "./config.js";
 
 // Reads the MCP server settings from environment variables.
 // The public deployment is pinned by default (payee and stamper); any other API needs its own pin.
@@ -40,17 +40,19 @@ export function createNotchTools({
 } = {}) {
   const settings = readSettings(env);
   let client;
+  const getClient = () =>
+    (client ??= createClient({
+      secret: settings.secret,
+      apiUrl: settings.apiUrl,
+      spendCap: settings.spendCap,
+      expectedPayee: settings.expectedPayee,
+    }));
 
   async function stampFile({ path }) {
     try {
-      client ??= createClient({
-        secret: settings.secret,
-        apiUrl: settings.apiUrl,
-        spendCap: settings.spendCap,
-        expectedPayee: settings.expectedPayee,
-      });
+      const paying = getClient();
       const hash = await sha256File(expandPath(path));
-      const result = await client.stamp(hash);
+      const result = await paying.stamp(hash);
       if (result.status === "already_stamped") {
         return ok(
           [
@@ -71,6 +73,28 @@ export function createNotchTools({
       );
     } catch (error) {
       return fail(describeError(error, path));
+    }
+  }
+
+  // Tells the user which wallet pays, how much it holds and what protects it. Never shows the secret.
+  async function checkBalance() {
+    try {
+      const paying = getClient();
+      const usdc = (await paying.usdcBalance()) / 1e7;
+      const price = Number(PRICE.replace("$", ""));
+      const lines = [
+        `Paying wallet: ${paying.address}`,
+        `Balance: ${usdc} USDC (about ${Math.floor(usdc / price)} stamps at ${price} USDC each)`,
+        `Spend cap per stamp: ${settings.spendCap}`,
+        `API: ${settings.apiUrl}`,
+        settings.expectedPayee ? `Only pays to: ${settings.expectedPayee}` : "Only pays to: any account (local API)",
+      ];
+      if (usdc < price) {
+        lines.push(`Not enough for a stamp. On testnet, get free USDC at https://faucet.circle.com (Stellar testnet) and send it to ${paying.address}.`);
+      }
+      return ok(lines.join("\n"));
+    } catch (error) {
+      return fail(describeError(error));
     }
   }
 
@@ -105,7 +129,7 @@ export function createNotchTools({
     }
   }
 
-  return { stampFile, verifyFile };
+  return { stampFile, verifyFile, checkBalance };
 }
 
 function describeError(error, path) {

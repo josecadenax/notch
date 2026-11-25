@@ -7,6 +7,8 @@
 //   npm run setup:accounts                                       all three accounts, into .env
 //   npm run setup:accounts -- --server-only --out .env.production
 //                                                                 payee and stamper only, for a deployed server
+//   npm run setup:accounts -- --agent-only                       only the paying wallet, into .env.agent
+//                                                                 (for people who just use the CLI or the MCP server)
 import { Keypair, Horizon, TransactionBuilder, Operation, Asset, BASE_FEE } from "@stellar/stellar-sdk";
 import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { HORIZON_URL, NETWORK_PASSPHRASE, USDC, EXPLORER_TX_URL } from "../src/config.js";
@@ -16,10 +18,14 @@ const AGENT_USDC = "1";
 
 const args = process.argv.slice(2);
 const serverOnly = args.includes("--server-only");
-const outFile = args.includes("--out") ? args[args.indexOf("--out") + 1] : ".env";
+const agentOnly = args.includes("--agent-only");
+if (serverOnly && agentOnly) throw new Error("Use --server-only or --agent-only, not both");
+const outFile = args.includes("--out") ? args[args.indexOf("--out") + 1] : agentOnly ? ".env.agent" : ".env";
 if (!outFile) throw new Error("--out needs a path");
 
-if (existsSync(outFile) && /^(PAYEE_PUBLIC|STAMPER_SECRET|AGENT_SECRET)=\S/m.test(readFileSync(outFile, "utf8"))) {
+// Never overwrite keys that already exist: losing a secret means losing the money in that wallet.
+const existingKeys = agentOnly ? /^AGENT_SECRET=\S/m : /^(PAYEE_PUBLIC|STAMPER_SECRET|AGENT_SECRET)=\S/m;
+if (existsSync(outFile) && existingKeys.test(readFileSync(outFile, "utf8"))) {
   console.log(`Accounts already configured in ${outFile}. Delete those lines to start over.`);
   process.exit(0);
 }
@@ -41,8 +47,8 @@ async function fundedAccount(label, { usdcTrustline }) {
   return keypair;
 }
 
-const payee = await fundedAccount("payee  ", { usdcTrustline: true });
-const stamper = await fundedAccount("stamper", { usdcTrustline: false });
+const payee = agentOnly ? null : await fundedAccount("payee  ", { usdcTrustline: true });
+const stamper = agentOnly ? null : await fundedAccount("stamper", { usdcTrustline: false });
 let agent = null;
 if (!serverOnly) {
   agent = await fundedAccount("agent  ", { usdcTrustline: true });
@@ -72,11 +78,15 @@ if (!serverOnly) {
   console.log(`agent funded with ${AGENT_USDC} USDC: ${EXPLORER_TX_URL}${result.hash}`);
 }
 
-const lines = [
-  `PAYEE_PUBLIC=${payee.publicKey()}`,
-  `STAMPER_PUBLIC=${stamper.publicKey()}`,
-  `STAMPER_SECRET=${stamper.secret()}`,
-];
+const lines = [];
+if (payee) lines.push(`PAYEE_PUBLIC=${payee.publicKey()}`);
+if (stamper) lines.push(`STAMPER_PUBLIC=${stamper.publicKey()}`, `STAMPER_SECRET=${stamper.secret()}`);
 if (agent) lines.push(`AGENT_PUBLIC=${agent.publicKey()}`, `AGENT_SECRET=${agent.secret()}`);
-appendFileSync(outFile, `${lines.join("\n")}\n`);
+// 0600: only the owner can read the secrets (applies when the file is created).
+appendFileSync(outFile, `${lines.join("\n")}\n`, { mode: 0o600 });
 console.log(`Keys saved to ${outFile} (never committed).`);
+if (agentOnly) {
+  console.log(`\nYour paying wallet: ${agent.publicKey()}`);
+  console.log(`Next: put the AGENT_SECRET line of ${outFile} in your MCP client settings. See docs/mcp.md.`);
+  console.log("Keep this wallet's balance small. Anyone with the secret can spend it.");
+}

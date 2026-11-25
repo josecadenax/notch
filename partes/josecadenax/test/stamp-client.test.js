@@ -123,3 +123,13 @@ test("stamp: rejects a malformed hash without any request", async () => {
   await assert.rejects(build(fetchFn).stamp("xyz"), (error) => error instanceof NotchError && error.code === "BAD_HASH");
   assert.equal(fetchFn.calls.length, 0);
 });
+
+test("usdcBalance: a wallet that was never funded gets a clear error instead of a crash", async () => {
+  const fetchFn = async () => new Response("{}", { status: 404 });
+  await assert.rejects(build(fetchFn).usdcBalance(), { code: "WALLET_NOT_FOUND", message: /Fund it first/ });
+});
+
+test("usdcBalance: reads the USDC balance in stroops", async () => {
+  const fetchFn = fakeFetch({ balance: "0.9300000" });
+  assert.equal(await build(fetchFn).usdcBalance(), 9300000);
+});

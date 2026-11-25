@@ -41,5 +41,17 @@ server.registerTool(
   async (args) => asResult(await tools.verifyFile(args)),
 );
 
+server.registerTool(
+  "check_balance",
+  {
+    title: "Check the paying wallet",
+    description:
+      "Shows the wallet that pays for stamps, its USDC balance, how many stamps it can still pay, " +
+      "the spend cap and which account it will pay. Free. Never shows the secret key.",
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+  },
+  async () => asResult(await tools.checkBalance()),
+);
+
 await server.connect(new StdioServerTransport());
 console.error("Notch MCP server ready");

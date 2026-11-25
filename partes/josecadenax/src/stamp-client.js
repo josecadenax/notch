@@ -73,6 +73,9 @@ export function createStampClient({
   // USDC balance in stroops (7 decimals).
   async function usdcBalance() {
     const response = await fetchFn(`${horizonUrl}/accounts/${signer.address}`);
+    if (response.status === 404) {
+      throw new NotchError("WALLET_NOT_FOUND", `The wallet ${signer.address} does not exist on the network yet. Fund it first (see docs/mcp.md).`);
+    }
     const balance = (await response.json()).balances.find((b) => b.asset_code === "USDC");
     return balance ? Math.round(Number(balance.balance) * 1e7) : 0;
   }

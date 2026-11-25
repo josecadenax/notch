@@ -17,6 +17,27 @@ Only the SHA-256 of a file leaves your computer, never the file itself.
 |---|---|---|
 | `stamp_file(path)` | 0.01 USDC | Hashes the file, pays with x402 and anchors the hash on Stellar. Stamping the same file twice is refused without charge and returns the existing stamp |
 | `verify_stamp(path, tx?)` | free | Checks the file against a stamp, directly on Stellar. If `tx` is omitted it is looked up by the file's hash |
+| `check_balance()` | free | Shows the paying wallet, its USDC balance, how many stamps it can still pay, the spend cap and the only account it will pay. Never shows the secret |
+
+## Your wallet
+
+Stamps are paid from **your own wallet**, the "paying wallet" or agent wallet. It is a Stellar account that only you hold:
+
+- It is created on your computer and its secret key (`AGENT_SECRET`) never goes to Notch or to any server.
+- The MCP server uses it to sign each payment. Anyone who has the secret can spend its balance, so keep it private.
+- **Use a dedicated wallet with a small balance**, not a wallet you use for anything else.
+
+Create one (testnet, free) with a single command from the project folder:
+
+```bash
+npm run setup:accounts -- --agent-only
+```
+
+This creates a new wallet, funds it with test XLM, buys 1 USDC of test money for it (enough for about 100 stamps) and saves its keys in `.env.agent`, readable only by you. It prints the wallet address. It never overwrites an existing `.env.agent`.
+
+To top it up later, send test USDC to the wallet address from <https://faucet.circle.com> (choose Stellar testnet). Ask Claude *"check my Notch balance"* at any time to see how many stamps are left.
+
+> The default `npm run setup:accounts` (without `--agent-only`) is for people who run their own Notch server: it also creates the payee and stamper accounts.
 
 ## Setup
 
@@ -28,8 +49,7 @@ Only the SHA-256 of a file leaves your computer, never the file itself.
    npm install
    ```
 
-2. Create a wallet for the agent and fund it (testnet). Use `npm run setup:accounts` and copy only the `AGENT_SECRET` line.
-   **Use a dedicated wallet with a small balance.** The MCP server can spend whatever this wallet holds, up to the spend cap per stamp.
+2. Create your paying wallet, as shown above (`npm run setup:accounts -- --agent-only`). Open `.env.agent` and copy the `AGENT_SECRET=...` value.
 
 3. Find the absolute path of Node, because Claude Desktop does not read your shell profile:
 
@@ -37,7 +57,7 @@ Only the SHA-256 of a file leaves your computer, never the file itself.
    which node
    ```
 
-4. Edit Claude Desktop's config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+4. Edit Claude Desktop's config (`~/Library/Application Support/Claude/claude_desktop_config.json`) and add `notch` inside `mcpServers`:
 
    ```json
    {
@@ -46,14 +66,14 @@ Only the SHA-256 of a file leaves your computer, never the file itself.
          "command": "/absolute/path/to/node",
          "args": ["/absolute/path/to/notch/partes/josecadenax/src/mcp-server.js"],
          "env": {
-           "AGENT_SECRET": "S...your agent wallet secret..."
+           "AGENT_SECRET": "S...your wallet secret..."
          }
        }
      }
    }
    ```
 
-5. Quit and reopen Claude Desktop. Ask: *"Stamp /Users/me/Documents/contract.pdf with Notch"* and then *"Verify that file"*.
+5. Quit Claude Desktop completely (Cmd+Q) and open it again. Ask: *"Check my Notch balance"*, then *"Stamp /Users/me/Documents/contract.pdf with Notch"* and *"Verify that file"*.
 
 Use **absolute paths** for files. Claude Desktop does not run in your project folder.
 
@@ -100,7 +120,8 @@ For local development, `NOTCH_API_URL=http://localhost:3001` needs no `EXPECTED_
 | Symptom | Likely cause |
 |---|---|
 | Claude shows the server as failed | `command` is not the absolute path to Node, or the `args` path is wrong. Check Claude's MCP log |
-| "Missing AGENT_SECRET" | The `env` block is missing or the key is empty |
+| "Missing AGENT_SECRET" | The `env` block is missing or the key is empty. Create a wallet with `npm run setup:accounts -- --agent-only` |
+| `WALLET_NOT_FOUND` | The wallet was never funded. Run `npm run setup:accounts -- --agent-only` or fund the address with test XLM from Friendbot |
 | `PAYEE_MISMATCH` | The API is asking to pay an account other than `EXPECTED_PAYEE`. Do not continue until you know why |
 | `INSUFFICIENT_BALANCE` | The agent wallet has less than 0.01 USDC |
 | `API_UNREACHABLE` | The API is down or you are offline. Nothing was paid |
