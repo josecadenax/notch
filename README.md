@@ -11,3 +11,7 @@ Each team member documents how to run their part in `partes/<user>/README.md`.
 ## Test hashes
 
 Each part lists its testnet payments, with a Stellar Expert link, in its README.
+
+## Team and parts
+
+- [josecadenax](https://github.com/josecadenax): [their part](partes/josecadenax/README.md)
