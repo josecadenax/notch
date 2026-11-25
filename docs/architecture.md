@@ -71,6 +71,8 @@ x402 verifies the payment first, runs the handler, and settles only if the handl
 | Stellar unreachable or rejects the transaction | 502 | No |
 | Settlement fails after the stamp exists | 402 | No, but a stamp exists. Accepted risk in the demo |
 
+The 502 row was checked on testnet with the real x402 facilitator: with Horizon unreachable the API answered 502 and the agent's balance did not change.
+
 The agent adds its own guards: a spending cap per payment (`SPEND_CAP`), a balance check before signing, retries only while the API is unreachable and never after paying.
 
 ## Verification
