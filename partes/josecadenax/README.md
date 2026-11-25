@@ -32,7 +32,7 @@ npm run setup:accounts     # creates payee, stamper and agent accounts on testne
 npm start                  # starts the API on http://localhost:3001
 npm run stamp -- file.pdf  # in another terminal: hashes the file, pays and stamps it
 npm run verify -- file.pdf <tx>   # checks a file against a stamp transaction, straight on Stellar
-npm test                   # 21 tests, including one against real testnet data
+npm test                   # 57 tests, including one against real testnet data
 ```
 
 Accounts:
