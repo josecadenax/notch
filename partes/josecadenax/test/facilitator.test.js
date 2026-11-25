@@ -48,3 +48,27 @@ test("missingApiKey: only OpenZeppelin Channels needs a key, and only when it is
   assert.equal(missingApiKey({ url: X402_ORG }), false);
   assert.equal(missingApiKey({ url: "https://channels.openzeppelin.com.evil.example/x402" }), false);
 });
+
+test("createFacilitator: logs how a settlement ended, whether it works, is refused or throws", async () => {
+  const realFetch = globalThis.fetch;
+  const lines = [];
+  const facilitator = createFacilitator({ url: X402_ORG, apiKey: "k-secret", log: (line) => lines.push(line) });
+  const answers = [
+    Response.json({ success: true, transaction: "abc123", network: "stellar:pubnet", payer: "GA" }),
+    Response.json({ success: false, errorReason: "tx_timeout", network: "stellar:pubnet", transaction: "" }),
+    new Response("boom", { status: 500 }),
+  ];
+  globalThis.fetch = async () => answers.shift();
+  try {
+    const payload = { x402Version: 2 };
+    await facilitator.settle(payload, {});
+    await facilitator.settle(payload, {});
+    await assert.rejects(facilitator.settle(payload, {}));
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+  assert.match(lines[0], /^settle ok in \d+ms: abc123$/);
+  assert.match(lines[1], /^settle REFUSED in \d+ms: tx_timeout/);
+  assert.match(lines[2], /^settle FAILED in \d+ms: /);
+  assert.ok(lines.every((line) => !line.includes("k-secret")), "the key is never logged");
+});

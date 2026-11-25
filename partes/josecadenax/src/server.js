@@ -28,7 +28,7 @@ if (missingApiKey({ url: FACILITATOR_URL, apiKey: FACILITATOR_API_KEY })) {
 // x402: without payment, POST /stamp answers 402 with the instructions to pay.
 const payment = paymentMiddlewareFromConfig(
   { "POST /stamp": { accepts: { scheme: "exact", price: PRICE, network: NETWORK, payTo: PAYEE_PUBLIC } } },
-  createFacilitator({ url: FACILITATOR_URL, apiKey: FACILITATOR_API_KEY }),
+  createFacilitator({ url: FACILITATOR_URL, apiKey: FACILITATOR_API_KEY, log: (line) => console.log(`[facilitator] ${line}`) }),
   [{ network: NETWORK, server: new ExactStellarScheme() }],
 );
 

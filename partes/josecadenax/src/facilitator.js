@@ -12,8 +12,26 @@ export function facilitatorConfig({ url, apiKey }) {
   return { url, createAuthHeaders: async () => ({ verify: headers, settle: headers, supported: headers }) };
 }
 
-export function createFacilitator(options) {
-  return new HTTPFacilitatorClient(facilitatorConfig(options));
+// `log` records how each settlement ended. A failed settlement used to leave only a bare 402 with an empty
+// body for the client, so this keeps the reason (and how long it took) on the server. The API key is never logged.
+export function createFacilitator({ log, ...options }) {
+  const client = new HTTPFacilitatorClient(facilitatorConfig(options));
+  if (!log) return client;
+  const settle = client.settle.bind(client);
+  client.settle = async (...args) => {
+    const started = Date.now();
+    const took = () => `${Date.now() - started}ms`;
+    try {
+      const result = await settle(...args);
+      if (result.success) log(`settle ok in ${took()}: ${result.transaction}`);
+      else log(`settle REFUSED in ${took()}: ${result.errorReason || "no reason"} ${result.errorMessage || ""}`.trim());
+      return result;
+    } catch (error) {
+      log(`settle FAILED in ${took()}: ${error.message}`);
+      throw error;
+    }
+  };
+  return client;
 }
 
 // OpenZeppelin Channels rejects calls without a key. Better to stop at startup with a clear message
