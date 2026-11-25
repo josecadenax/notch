@@ -133,7 +133,7 @@ A stamp made against the public API (deployed on Railway): [`16e1df0c…a80d`](h
 
 ## Current limits
 
-- **Testnet only.** The money is test money. For mainnet, each user would use their own funded wallet, with the spending cap the client already enforces. Enforcing that limit in the account itself (for example with smart accounts) would be a future improvement, not a requirement.
+- **Testnet and mainnet.** The public API above runs on testnet (test money). There is also a mainnet API with real money, already tried with real stamps: its addresses and how to use it are in [docs/mainnet.md](docs/mainnet.md). On both, each user uses their own funded wallet, with the spending cap the client already enforces. Enforcing that limit in the account itself (for example with smart accounts) would be a future improvement, not a requirement.
 - **The paying wallet depends on the user.** Notch never creates or holds it: the server only charges and stamps.
 - **A single server instance**, because stamps are signed in a queue using Stellar sequence numbers.
 

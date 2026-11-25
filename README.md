@@ -135,7 +135,7 @@ Sello hecho contra la API pública (desplegada en Railway): [`16e1df0c…a80d`](
 
 ## Límites actuales
 
-- **Solo testnet.** El dinero es de prueba. Para mainnet, cada usuario usaría su propia cartera ya fondeada, con el tope de gasto que ya aplica el cliente. Imponer ese límite en la propia cuenta (por ejemplo con cuentas inteligentes) sería una mejora futura, no un requisito.
+- **Testnet y mainnet.** La API pública de arriba usa testnet (dinero de prueba). También hay una API en mainnet con dinero real, ya probada con sellos reales: sus direcciones y cómo usarla están en [docs/mainnet.md](docs/mainnet.md). En ambas, cada usuario usa su propia cartera ya fondeada, con el tope de gasto que ya aplica el cliente. Imponer ese límite en la propia cuenta (por ejemplo con cuentas inteligentes) sería una mejora futura, no un requisito.
 - **La cartera que paga depende del usuario.** Notch nunca la crea ni la custodia: el servidor solo cobra y sella.
 - **Una sola instancia del servidor**, porque los sellos se firman en cola con números de secuencia de Stellar.
 
