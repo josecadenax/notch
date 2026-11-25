@@ -53,6 +53,29 @@ The hosted service is free but caps how many network fees each API key can consu
 
 So the real capacity of one key is unknown until measured. On testnet, with the facilitator pointed at the OpenZeppelin testnet URL, stamp new files one after another until the first `FEE_LIMIT_EXCEEDED`, and note how many stamps fit. Each test stamp costs 0.01 test USDC. Write the number down: it tells you how many stamps per day one key supports.
 
+### Measured result (25 Nov 2026, testnet)
+
+One fresh key, stamping random hashes against a local Notch server with `partes/josecadenax/scripts/measure-facilitator-limit.js`:
+
+| Measure | Result |
+|---|---|
+| Stamps paid in one run | **51** (50 in the run plus 1 earlier test), all successful |
+| Limit reached | **No**. The limit is higher than what was consumed |
+| Fee per settlement | **11,698 stroops** (about 0.0012 XLM), the same on every stamp |
+| Fees consumed by the 50 stamps | 584,900 stroops (about 0.058 XLM) |
+| Time per stamp, end to end | about **10 seconds** |
+
+So one key supports **at least 51 stamps per day**. The real ceiling is still unknown. Every extra 100 stamps cost 1 test USDC and about 17 minutes, so the practical way to learn it is to ask OpenZeppelin for the number. If the cap were 1 XLM of fees, a key would cover about 850 stamps a day.
+
+Run it again with:
+
+```bash
+FACILITATOR_URL=... FACILITATOR_API_KEY=... PORT=3002 npm start
+API_URL=http://localhost:3002 node --env-file=.env partes/josecadenax/scripts/measure-facilitator-limit.js 50
+```
+
+The script refuses to run against anything but a local server.
+
 If one key is not enough, the options are to ask OpenZeppelin for more capacity, to use several keys, or to self-host the facilitator plugin, which their guide recommends for higher throughput.
 
 ## For mainnet
