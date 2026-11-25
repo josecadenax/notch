@@ -1,7 +1,18 @@
 {
-  "name": "notch",
+  "name": "notch-mcp",
   "version": "1.0.0",
   "description": "Pay-per-use timestamping API for AI agents on Stellar, paid with x402",
+  "bin": {
+    "notch-mcp": "partes/josecadenax/src/mcp-server.js"
+  },
+  "files": [
+    "partes/josecadenax/src/",
+    "README.md",
+    "README.en.md",
+    "LICENSE",
+    "docs/mcp.md",
+    "docs/mainnet.md"
+  ],
   "scripts": {
     "test": "node --env-file-if-exists=.env --test",
     "setup:accounts": "node --env-file-if-exists=.env partes/josecadenax/scripts/setup-accounts.js",
@@ -35,5 +46,16 @@
   },
   "engines": {
     "node": ">=22"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "mcp",
+    "x402",
+    "stellar",
+    "timestamp",
+    "claude",
+    "agents"
+  ]
 }
