@@ -47,9 +47,9 @@ sequenceDiagram
 
 ## Demo video
 
-[![Demo video](docs/assets/demo/notch-demo-poster.jpg)](https://github.com/josecadenax/notch/blob/main/docs/assets/demo/notch-demo-backup.mp4)
+![Demo video](docs/assets/demo/notch-demo.gif)
 
-Click the image to watch the video (1:23, no audio). It is an animation built from the real output of a run on Stellar testnet, with the waits shortened. The hashes shown can be opened in Stellar Expert.
+A 1:23 animation built from the real output of a run on Stellar testnet, with the waits shortened. The hashes shown can be opened in Stellar Expert. [Download the video (mp4)](https://github.com/josecadenax/notch/raw/main/docs/assets/demo/notch-demo-backup.mp4).
 
 ## How to run it
 
