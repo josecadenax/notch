@@ -79,12 +79,17 @@ Notch incluye un servidor MCP local. Claude Desktop lo arranca en tu computadora
 | `verify_stamp` | gratis | Comprueba un archivo contra su sello, directo en Stellar |
 | `check_balance` | gratis | Muestra tu cartera, el saldo y cuántos sellos te quedan |
 
-```
-npm install
-npm run setup:accounts -- --agent-only   # crea tu cartera de testnet en .env.agent
+Está publicado en npm como [`notch-mcp`](https://www.npmjs.com/package/notch-mcp), sin clonar nada. Se añade a la configuración de Claude Desktop con `npx`:
+
+```json
+"notch-testnet": {
+  "command": "/ruta/absoluta/a/npx",
+  "args": ["-y", "notch-mcp"],
+  "env": { "AGENT_SECRET": "S...la secreta de tu cartera..." }
+}
 ```
 
-Después se añade `notch` a la configuración de Claude Desktop. Los pasos están en [docs/mcp.md](docs/mcp.md).
+Los pasos completos, cómo conseguir la cartera y cómo pasar a mainnet están en [docs/mcp.md](docs/mcp.md).
 
 **La cartera que paga es tuya.** Se crea en tu máquina, su llave nunca llega al servidor, y el cliente solo paga a la cuenta que tiene fijada (`EXPECTED_PAYEE`), así que una API falsa no puede cobrarte. Usa una cartera dedicada con poco saldo.
 

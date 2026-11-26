@@ -23,7 +23,7 @@ The demo runs against the **public API** (deployed on Railway, Stellar testnet),
 
   It must print `{"name":"Notch","network":"stellar:testnet"...`.
 - **The agent wallet has USDC.** In Claude Desktop ask *"check my Notch balance"*. Each stamp costs 0.01. Below 0.05 USDC, top it up at https://faucet.circle.com (Stellar testnet) to the wallet address it shows.
-- **Claude Desktop shows `notch`** with three tools (`stamp_file`, `verify_stamp`, `check_balance`). If not, quit it with Cmd+Q and open it again. Setup is in [mcp.md](mcp.md).
+- **Claude Desktop shows `notch-testnet`** with three tools (`stamp_file`, `verify_stamp`, `check_balance`). If not, quit it with Cmd+Q and open it again. Setup is in [mcp.md](mcp.md).
 - Terminal in the repo folder, font size large, with the API pointed at the public server:
 
   ```
@@ -144,6 +144,6 @@ Close with the repo: README that runs from a clean clone, 57 tests in green, a C
 | `PAYEE_MISMATCH` | Stop. The API asked to pay an account other than the expected one. Do not continue until you know why |
 | `INSUFFICIENT_BALANCE` | Top up the wallet at https://faucet.circle.com (Stellar testnet) |
 | `Already stamped` | Use a new file, the hash was stamped before |
-| `notch` is missing in Claude Desktop | Quit it with Cmd+Q and reopen. Check `~/Library/Logs/Claude/mcp-server-notch.log` |
+| `notch-testnet` is missing in Claude Desktop | Quit it with Cmd+Q and reopen. Check `~/Library/Logs/Claude/mcp-server-notch-testnet.log` |
 | Facilitator or Horizon timeout | Wait a few seconds and try again: a 502 is never charged |
 | Anything else live | Switch to the backup video and keep talking over it |

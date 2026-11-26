@@ -60,30 +60,24 @@ To top it up later, send test USDC to the wallet address from <https://faucet.ci
 
 ## Setup
 
-1. Get the code and install dependencies (Node 22 or newer):
+The server is published on npm as [`notch-mcp`](https://www.npmjs.com/package/notch-mcp), so there is nothing to clone. You need Node 22 or newer.
+
+1. Get your paying wallet, as shown above. On mainnet, bring your own account. On testnet, the wallet is created from the project folder (see [On testnet](#on-testnet-create-a-test-wallet)): open `.env.agent` and copy the `AGENT_SECRET=...` value.
+
+2. Find the absolute path of `npx`, because Claude Desktop does not read your shell profile:
 
    ```bash
-   git clone https://github.com/josecadenax/notch.git
-   cd notch
-   npm install
+   which npx
    ```
 
-2. Get your paying wallet, as shown above. On testnet, `npm run setup:accounts -- --agent-only` creates one: open `.env.agent` and copy the `AGENT_SECRET=...` value. On mainnet, bring your own account.
-
-3. Find the absolute path of Node, because Claude Desktop does not read your shell profile:
-
-   ```bash
-   which node
-   ```
-
-4. Edit Claude Desktop's config (`~/Library/Application Support/Claude/claude_desktop_config.json`) and add `notch` inside `mcpServers`:
+3. Edit Claude Desktop's config (`~/Library/Application Support/Claude/claude_desktop_config.json`) and add `notch-testnet` inside `mcpServers`:
 
    ```json
    {
      "mcpServers": {
-       "notch": {
-         "command": "/absolute/path/to/node",
-         "args": ["/absolute/path/to/notch/partes/josecadenax/src/mcp-server.js"],
+       "notch-testnet": {
+         "command": "/absolute/path/to/npx",
+         "args": ["-y", "notch-mcp"],
          "env": {
            "AGENT_SECRET": "S...your wallet secret..."
          }
@@ -92,38 +86,61 @@ To top it up later, send test USDC to the wallet address from <https://faucet.ci
    }
    ```
 
-5. Quit Claude Desktop completely (Cmd+Q) and open it again. Ask: *"Check my Notch balance"*, then *"Stamp /Users/me/Documents/contract.pdf with Notch"* and *"Verify that file"*.
+4. Quit Claude Desktop completely (Cmd+Q) and open it again. Ask: *"Check my Notch balance"*, then *"Stamp /Users/me/Documents/contract.pdf with Notch"* and *"Verify that file"*.
 
 Use **absolute paths** for files. Claude Desktop does not run in your project folder.
+
+### Running from a clone instead
+
+If you prefer to run the code from a clone (to read or change it), use `node` and the path of the script:
+
+```bash
+git clone https://github.com/josecadenax/notch.git
+cd notch
+npm install
+```
+
+```json
+"command": "/absolute/path/to/node",
+"args": ["/absolute/path/to/notch/partes/josecadenax/src/mcp-server.js"]
+```
+
+### Testnet and mainnet side by side
+
+Give each network its own entry (`notch-testnet`, `notch-mainnet`), each with its own wallet, and keep only one in the config at a time. With both present Claude sees two almost identical tools and may pick the wrong one, and the mainnet one spends real money.
 
 ## Mainnet
 
 Everything above uses testnet and test money. Mainnet uses **real money**, so it is never on by accident: you have to ask for it, name everything it needs, and there are no defaults to fall back on. The full plan is in [mainnet.md](mainnet.md).
 
-Add these to the `env` block of the `notch` server. `AGENT_SECRET` is the account you bring, as explained in [Your wallet](#on-mainnet-bring-your-own):
+Add a `notch-mainnet` entry. `AGENT_SECRET` is the account you bring, as explained in [Your wallet](#on-mainnet-bring-your-own). The official mainnet API and its payee are pinned by default, so for them you only need these four:
 
 ```json
-"env": {
-  "AGENT_SECRET": "S...the secret of a dedicated wallet with a small balance...",
-  "STELLAR_NETWORK": "pubnet",
-  "NOTCH_ALLOW_MAINNET": "1",
-  "NOTCH_API_URL": "https://...the mainnet Notch API...",
-  "EXPECTED_PAYEE": "G...the account that must receive the payment...",
-  "SOROBAN_RPC_URL": "https://...an RPC from your provider..."
+"notch-mainnet": {
+  "command": "/absolute/path/to/npx",
+  "args": ["-y", "notch-mcp"],
+  "env": {
+    "AGENT_SECRET": "S...the secret of a dedicated wallet with a small balance...",
+    "STELLAR_NETWORK": "pubnet",
+    "NOTCH_ALLOW_MAINNET": "1",
+    "SOROBAN_RPC_URL": "https://...an RPC from your provider..."
+  }
 }
 ```
+
+To use another mainnet server, also set `NOTCH_API_URL` and `EXPECTED_PAYEE`.
 
 | Setting | What it is |
 |---|---|
 | `STELLAR_NETWORK=pubnet` | Use mainnet |
 | `NOTCH_ALLOW_MAINNET=1` | A second, explicit "yes, real money" |
-| `NOTCH_API_URL` | The Notch API to use. There is no default on mainnet |
-| `EXPECTED_PAYEE` | The only account you will pay, so a fake API cannot charge you |
+| `NOTCH_API_URL` | The Notch API to use. Pinned to the official mainnet API by default |
+| `EXPECTED_PAYEE` | The only account you will pay, so a fake API cannot charge you. Pinned for the official API |
 | `SOROBAN_RPC_URL` | A Soroban RPC from a provider. Stellar runs none for mainnet. See [what it is used for](mainnet.md#the-soroban-rpc-what-it-is-and-what-users-must-do) |
 
 You do not have to remember this list. If something is missing, Notch tells you **all of it at once**, with the block to paste:
 
-- when Claude Desktop starts the server, in its log (`~/Library/Logs/Claude/mcp-server-notch.log`), and
+- when Claude Desktop starts the server, in its log (`~/Library/Logs/Claude/mcp-server-notch-mainnet.log`), and
 - in the answer to any tool. For example, asking *"check my Notch balance"* answers with what is missing and says to quit Claude Desktop (Cmd+Q) and open it again. Claude will explain it to you.
 
 Once everything is set, `check_balance` shows `Network: mainnet (REAL money)`, your wallet, its balance and the only account it will pay. Start with cents.

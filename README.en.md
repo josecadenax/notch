@@ -79,12 +79,17 @@ Notch ships a local MCP server. Claude Desktop starts it on your computer and st
 | `verify_stamp` | free | Checks a file against its stamp, straight on Stellar |
 | `check_balance` | free | Shows your wallet, its balance and how many stamps are left |
 
-```
-npm install
-npm run setup:accounts -- --agent-only   # creates your testnet wallet in .env.agent
+It is published on npm as [`notch-mcp`](https://www.npmjs.com/package/notch-mcp), so there is nothing to clone. Add it to Claude Desktop's config with `npx`:
+
+```json
+"notch-testnet": {
+  "command": "/absolute/path/to/npx",
+  "args": ["-y", "notch-mcp"],
+  "env": { "AGENT_SECRET": "S...your wallet secret..." }
+}
 ```
 
-Then add `notch` to Claude Desktop's config. The steps are in [docs/mcp.md](docs/mcp.md).
+The full steps, how to get a wallet and how to switch to mainnet are in [docs/mcp.md](docs/mcp.md).
 
 **The paying wallet is yours.** It is created on your machine, its key never reaches the server, and the client only pays the account it has pinned (`EXPECTED_PAYEE`), so a fake API cannot charge you. Use a dedicated wallet with a small balance.
 
