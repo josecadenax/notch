@@ -128,12 +128,12 @@ Open the `Stamp:` link: the memo is the SHA-256 of the file and the date is the 
 
 ## 4:30 What comes next
 
-- **Mainnet.** Each user uses their own funded wallet, with the spending cap and the pinned payee the client already enforces. Later, the limit could also be enforced by the account itself, for example with smart accounts, so a leaked key cannot spend more than a policy allows. That is an option, not a requirement.
+- **Mainnet is live** (see [mainnet.md](mainnet.md)). Each user pays from their own funded wallet, with the spending cap and the pinned payee the client already enforces. Next, the limit could also be enforced by the account itself, for example with smart accounts, so a leaked key cannot spend more than a policy allows. That is an option, not a requirement.
 - Batching hashes in a Merkle tree to cut the cost per stamp.
 
-Be clear about where it stands today: Stellar testnet, and the paying wallet belongs to the user (Notch never creates or holds it).
+Be clear about where it stands today: testnet for the demo and a mainnet API with real stamps behind it, and the paying wallet belongs to the user (Notch never creates or holds it).
 
-Close with the repo: README that runs from a clean clone, 57 tests in green, a CI badge and a live API.
+Close with the repo: README that runs from a clean clone, 86 tests in green, a CI badge and a live API.
 
 ## If something fails
 
