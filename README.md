@@ -11,20 +11,18 @@ Español | [English](README.en.md)
 [![mainnet API](https://img.shields.io/website?url=https%3A%2F%2Fzestful-mercy-production-31bdd567.up.railway.app&up_message=online&down_message=offline&label=mainnet%20API)](https://zestful-mercy-production-31bdd567.up.railway.app)
 [![License: ISC](https://img.shields.io/badge/license-ISC-blue)](LICENSE)
 
-**Notch deja constancia de cuándo existió un documento, y se cobra por uso: un centavo de dólar por sello.**
+Cada vez más, los agentes de IA producen documentos con valor real: reportes, contratos, conjuntos de datos. Pero cuando alguien pregunta "¿este documento ya existía antes de la fecha límite?" o "¿lo modificaron después?", no hay forma independiente de comprobarlo. La única evidencia son los registros de quien lo generó.
 
-Está pensado para agentes de IA, que ya escriben reportes y contratos pero no tienen cuenta ni tarjeta para pagar un servicio.
+**Notch resuelve ese problema.** Es un servicio que deja constancia de cuándo existió un documento. El agente envía la huella digital del archivo (un código único llamado hash; el archivo nunca sale de su máquina), Notch la guarda en la red Stellar y, desde ese momento, cualquiera puede comprobar gratis que el documento existía a más tardar en esa fecha y que no ha cambiado.
 
-Cuando un agente de IA entrega un reporte o un contrato, nadie puede demostrar después cuándo se hizo ni si lo editaron. Notch resuelve eso: el agente envía la huella digital del archivo (un código único llamado hash; el archivo no sale de su máquina), paga 0.01 USDC y Notch la guarda en la red Stellar. Desde ese momento, cualquiera puede comprobar gratis que el documento existía a más tardar en esa fecha y que no ha cambiado.
-
-**Cómo se usa:** sin cuenta, sin llave de API y sin suscripción. El agente solo paga por cada sello, con x402, un estándar para pagar por uso.
+Un agente no tiene cuenta ni tarjeta con un proveedor, así que Notch cobra por uso: un centavo de dólar por sello, con x402, un estándar para pagar por uso. No hay registro en Notch, ni llave de API, ni suscripción. Lo único que el agente necesita es **su propia cartera de Stellar con algo de USDC**, que paga directamente cada sello desde su máquina. Notch nunca la crea ni guarda su llave.
 
 **Estado:** funciona en Stellar testnet (dinero de prueba) y en mainnet (dinero real).
 
 ## Notch en tres pasos
 
 1. **El agente calcula la huella del archivo** (el hash). El archivo no sale de su máquina.
-2. **Paga 0.01 USDC con x402.** Sin cuenta, sin llave de API y sin suscripción.
+2. **Paga 0.01 USDC con x402, desde su propia cartera.** No hay registro en Notch.
 3. **Notch guarda la huella en Stellar** (en el *memo*, el campo de texto de una transacción) y devuelve la prueba. Después, cualquiera la verifica gratis.
 
 ## Míralo funcionar
@@ -32,12 +30,6 @@ Cuando un agente de IA entrega un reporte o un contrato, nadie puede demostrar d
 ![Demo en video](docs/assets/demo/notch-demo.gif)
 
 Animación de 1:23 hecha con la salida real de una ejecución en Stellar testnet, con las esperas acortadas. Los hashes que aparecen se pueden abrir en Stellar Expert. [Descargar el video (mp4)](https://github.com/josecadenax/notch/raw/main/docs/assets/demo/notch-demo-backup.mp4).
-
-## El problema
-
-Los agentes ya escriben informes, contratos y conjuntos de datos, y a veces cobran por ellos. Cuando alguien pregunta "¿esto existía antes de la fecha límite?" o "¿se modificó después?", la única evidencia son los registros del propio agente, que controla la misma parte.
-
-Un agente además no tiene cuenta, tarjeta ni contrato con un proveedor de sellos de tiempo. Lo que sí puede hacer es pagar un centavo por llamada, y por eso Notch cobra con x402: sin registro, sin llave de API y sin suscripción.
 
 ## Cómo lo resuelve Notch
 

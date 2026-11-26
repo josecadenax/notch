@@ -11,20 +11,18 @@
 [![mainnet API](https://img.shields.io/website?url=https%3A%2F%2Fzestful-mercy-production-31bdd567.up.railway.app&up_message=online&down_message=offline&label=mainnet%20API)](https://zestful-mercy-production-31bdd567.up.railway.app)
 [![License: ISC](https://img.shields.io/badge/license-ISC-blue)](LICENSE)
 
-**Notch records when a document existed, and charges per use: one cent of a dollar per stamp.**
+More and more, AI agents produce documents with real value: reports, contracts, datasets. But when someone asks "did this document already exist before the deadline?" or "was it changed afterwards?", there is no independent way to check. The only evidence is the logs of whoever produced it.
 
-It is built for AI agents, which already write reports and contracts but have no account or credit card to pay for a service.
+**Notch solves that problem.** It is a service that records when a document existed. The agent sends the file's digital fingerprint (a unique code called a hash; the file never leaves its machine), Notch records it on the Stellar network and, from then on, anyone can check for free that the document existed no later than that date and has not changed.
 
-When an AI agent delivers a report or a contract, nobody can later show when it was made or whether it was edited. Notch solves that: the agent sends the file's digital fingerprint (a unique code called a hash; the file stays on its machine), pays 0.01 USDC, and Notch records it on the Stellar network. From then on, anyone can check for free that the document existed no later than that date and has not changed.
-
-**How it is used:** no account, no API key and no subscription. The agent pays only for each stamp, with x402, a standard for pay-per-use payments.
+An agent has no account or credit card with a provider, so Notch charges per use: one cent of a dollar per stamp, with x402, a standard for pay-per-use payments. There is no sign-up with Notch, no API key and no subscription. All the agent needs is **its own Stellar wallet with some USDC**, which pays each stamp directly from its machine. Notch never creates the wallet or holds its key.
 
 **Status:** it works on Stellar testnet (test money) and on mainnet (real money).
 
 ## Notch in three steps
 
 1. **The agent computes the file's fingerprint** (the hash). The file never leaves its machine.
-2. **It pays 0.01 USDC with x402.** No account, no API key and no subscription.
+2. **It pays 0.01 USDC with x402, from its own wallet.** There is no sign-up with Notch.
 3. **Notch records the fingerprint on Stellar** (in the *memo*, the text field of a transaction) and returns the proof. Afterwards, anyone can verify it for free.
 
 ## See it working
@@ -32,12 +30,6 @@ When an AI agent delivers a report or a contract, nobody can later show when it 
 ![Demo video](docs/assets/demo/notch-demo.gif)
 
 A 1:23 animation built from the real output of a run on Stellar testnet, with the waits shortened. The hashes shown can be opened in Stellar Expert. [Download the video (mp4)](https://github.com/josecadenax/notch/raw/main/docs/assets/demo/notch-demo-backup.mp4).
-
-## The problem
-
-Agents now write reports, contracts and datasets, and often get paid for them. When someone asks "was this written before the deadline?" or "was it changed afterwards?", the only evidence is the agent's own logs, which the same party controls.
-
-An agent also has no account, no credit card and no contract with a timestamp provider. What it can do is pay one cent per call, which is why Notch charges with x402: no sign-up, no API key and no subscription.
 
 ## How Notch solves it
 
