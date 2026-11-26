@@ -10,20 +10,26 @@ Español | [English](README.en.md)
 [![testnet API](https://img.shields.io/website?url=https%3A%2F%2Fnotch-production-721b582b.up.railway.app&up_message=online&down_message=offline&label=testnet%20API)](https://notch-production-721b582b.up.railway.app)
 [![mainnet API](https://img.shields.io/website?url=https%3A%2F%2Fzestful-mercy-production-31bdd567.up.railway.app&up_message=online&down_message=offline&label=mainnet%20API)](https://zestful-mercy-production-31bdd567.up.railway.app)
 [![License: ISC](https://img.shields.io/badge/license-ISC-blue)](LICENSE)
-[![Node 22+](https://img.shields.io/badge/node-%3E%3D22-339933?logo=nodedotjs&logoColor=white)](package.json)
-[![Stellar](https://img.shields.io/badge/Stellar-testnet%20%2B%20mainnet-7D00FF)](https://stellar.expert)
-[![x402](https://img.shields.io/badge/x402-pay%20per%20use-413A68)](https://www.x402.org)
-[![MCP server](https://img.shields.io/badge/MCP-server-18A8B5)](docs/mcp.md)
 
-**Sellos de tiempo de pago por uso para agentes de IA, sobre Stellar.**
+**Una prueba de que un documento existía en una fecha, que un agente de IA compra por un centavo.**
 
-Un agente calcula el hash de lo que produjo, paga 0.01 USDC con x402, y Notch ancla ese hash en una transacción de Stellar. Desde ese momento, cualquiera puede comprobar gratis que el documento existía a más tardar en esa fecha.
+Cuando un agente de IA entrega un reporte o un contrato, nadie puede demostrar después cuándo se hizo ni si lo editaron. Notch resuelve eso: el agente envía la huella digital del archivo (un código único llamado hash; el archivo no sale de su máquina), paga 0.01 USDC y Notch la guarda en la red Stellar. Desde ese momento, cualquiera puede comprobar gratis que el documento existía a más tardar en esa fecha y que no ha cambiado.
 
-**Track:** API de pago (x402) · Código 402 · BAF México × Programa de Embajadores de Stellar · Stellar testnet (dinero de prueba, sin valor real)
+**Cómo se usa:** sin cuenta, sin llave de API y sin suscripción. El agente solo paga por cada sello, con x402, un estándar para pagar por uso.
 
-## Por qué se llama Notch
+**Estado:** funciona en Stellar testnet (dinero de prueba) y en mainnet (dinero real).
 
-*Notch* significa **muesca**: el corte pequeño que se hacía en un palo o una madera para dejar constancia de algo. Era la forma más antigua de llevar un registro, y tiene las mismas propiedades que buscamos: la marca es permanente, prueba que algo estuvo ahí, no dice qué era y se nota si alguien intenta alterarla. Notch hace lo mismo con un documento: deja una muesca en Stellar con su huella, sin revelar el archivo.
+## Notch en tres pasos
+
+1. **El agente calcula la huella del archivo** (el hash). El archivo no sale de su máquina.
+2. **Paga 0.01 USDC con x402.** Sin cuenta, sin llave de API y sin suscripción.
+3. **Notch guarda la huella en Stellar** (en el *memo*, el campo de texto de una transacción) y devuelve la prueba. Después, cualquiera la verifica gratis.
+
+## Míralo funcionar
+
+![Demo en video](docs/assets/demo/notch-demo.gif)
+
+Animación de 1:23 hecha con la salida real de una ejecución en Stellar testnet, con las esperas acortadas. Los hashes que aparecen se pueden abrir en Stellar Expert. [Descargar el video (mp4)](https://github.com/josecadenax/notch/raw/main/docs/assets/demo/notch-demo-backup.mp4).
 
 ## El problema
 
@@ -55,6 +61,10 @@ sequenceDiagram
 - **La fecha es la de Stellar**, la hora de cierre del ledger, no el reloj del servidor.
 - **Verificar es gratis** y no requiere a Notch: el memo de la transacción se lee en cualquier explorador.
 - **Solo pagas por sellos que existen.** Un sello fallido nunca se cobra.
+
+## Por qué se llama Notch
+
+*Notch* significa **muesca**: el corte pequeño que se hacía en un palo o una madera para dejar constancia de algo. Era la forma más antigua de llevar un registro, y tiene las mismas propiedades que buscamos: la marca es permanente, prueba que algo estuvo ahí, no dice qué era y se nota si alguien intenta alterarla. Notch hace lo mismo con un documento: deja una muesca en Stellar con su huella, sin revelar el archivo.
 
 ## Pruébalo ahora
 
@@ -98,12 +108,6 @@ Los pasos completos, cómo conseguir la cartera y cómo pasar a mainnet están e
 
 **La cartera que paga es tuya.** Se crea en tu máquina, su llave nunca llega al servidor, y el cliente solo paga a la cuenta que tiene fijada (`EXPECTED_PAYEE`), así que una API falsa no puede cobrarte. Usa una cartera dedicada con poco saldo.
 
-## Demo en video
-
-![Demo en video](docs/assets/demo/notch-demo.gif)
-
-Animación de 1:23 hecha con la salida real de una ejecución en Stellar testnet, con las esperas acortadas. Los hashes que aparecen se pueden abrir en Stellar Expert. [Descargar el video (mp4)](https://github.com/josecadenax/notch/raw/main/docs/assets/demo/notch-demo-backup.mp4).
-
 ## Cómo correrlo
 
 Requiere Node 22 o superior. El código vive en [`partes/josecadenax`](partes/josecadenax/README.md).
@@ -114,7 +118,7 @@ npm run setup:accounts           # cuentas de testnet, las llaves se guardan en 
 npm start                        # API en http://localhost:3001
 npm run stamp -- archivo.pdf     # en otra terminal: calcula el hash, paga y sella
 npm run verify -- archivo.pdf <tx>  # comprueba un archivo contra un sello
-npm test                         # 57 pruebas
+npm test                         # 86 pruebas
 ```
 
 Para sellar contra la API pública en lugar de tu servidor local, crea tu cartera con `npm run setup:accounts -- --agent-only`, copia su `AGENT_SECRET` a `.env` y ejecuta:
@@ -152,3 +156,7 @@ Sello hecho contra la API pública (desplegada en Railway): [`16e1df0c…a80d`](
 ## Equipo y partes
 
 - [josecadenax](https://github.com/josecadenax): [su parte](partes/josecadenax/README.md)
+
+## Contexto del proyecto
+
+**Track:** API de pago (x402) · Código 402 · BAF México × Programa de Embajadores de Stellar · Stellar testnet y mainnet

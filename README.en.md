@@ -10,20 +10,26 @@
 [![testnet API](https://img.shields.io/website?url=https%3A%2F%2Fnotch-production-721b582b.up.railway.app&up_message=online&down_message=offline&label=testnet%20API)](https://notch-production-721b582b.up.railway.app)
 [![mainnet API](https://img.shields.io/website?url=https%3A%2F%2Fzestful-mercy-production-31bdd567.up.railway.app&up_message=online&down_message=offline&label=mainnet%20API)](https://zestful-mercy-production-31bdd567.up.railway.app)
 [![License: ISC](https://img.shields.io/badge/license-ISC-blue)](LICENSE)
-[![Node 22+](https://img.shields.io/badge/node-%3E%3D22-339933?logo=nodedotjs&logoColor=white)](package.json)
-[![Stellar](https://img.shields.io/badge/Stellar-testnet%20%2B%20mainnet-7D00FF)](https://stellar.expert)
-[![x402](https://img.shields.io/badge/x402-pay%20per%20use-413A68)](https://www.x402.org)
-[![MCP server](https://img.shields.io/badge/MCP-server-18A8B5)](docs/mcp.md)
 
-**Pay-per-use timestamps for AI agents, on Stellar.**
+**Proof that a document existed on a given date, which an AI agent buys for one cent.**
 
-An agent hashes what it produced, pays 0.01 USDC with x402, and Notch anchors that hash in a Stellar transaction. From then on, anyone can prove for free that the document existed no later than that date.
+When an AI agent delivers a report or a contract, nobody can later show when it was made or whether it was edited. Notch solves that: the agent sends the file's digital fingerprint (a unique code called a hash; the file stays on its machine), pays 0.01 USDC, and Notch records it on the Stellar network. From then on, anyone can check for free that the document existed no later than that date and has not changed.
 
-**Track:** API de pago (x402) · Código 402 · BAF México × Programa de Embajadores de Stellar · Stellar testnet (test money, no real value)
+**How it is used:** no account, no API key and no subscription. The agent pays only for each stamp, with x402, a standard for pay-per-use payments.
 
-## Why it is called Notch
+**Status:** it works on Stellar testnet (test money) and on mainnet (real money).
 
-A *notch* is the small cut that used to be made in a stick or a piece of wood to keep a record of something. It is the oldest way of keeping a record, and it has the properties we want: the mark is permanent, it proves that something was there, it does not say what it was, and tampering with it shows. Notch does the same with a document: it cuts a notch in Stellar with its fingerprint, without revealing the file.
+## Notch in three steps
+
+1. **The agent computes the file's fingerprint** (the hash). The file never leaves its machine.
+2. **It pays 0.01 USDC with x402.** No account, no API key and no subscription.
+3. **Notch records the fingerprint on Stellar** (in the *memo*, the text field of a transaction) and returns the proof. Afterwards, anyone can verify it for free.
+
+## See it working
+
+![Demo video](docs/assets/demo/notch-demo.gif)
+
+A 1:23 animation built from the real output of a run on Stellar testnet, with the waits shortened. The hashes shown can be opened in Stellar Expert. [Download the video (mp4)](https://github.com/josecadenax/notch/raw/main/docs/assets/demo/notch-demo-backup.mp4).
 
 ## The problem
 
@@ -55,6 +61,10 @@ sequenceDiagram
 - **The date is Stellar's**, the close time of the ledger, not the server's clock.
 - **Verification is free** and does not need Notch: the memo of the transaction can be read on any explorer.
 - **You pay only for stamps that exist.** A failed stamp is never charged.
+
+## Why it is called Notch
+
+A *notch* is the small cut that used to be made in a stick or a piece of wood to keep a record of something. It is the oldest way of keeping a record, and it has the properties we want: the mark is permanent, it proves that something was there, it does not say what it was, and tampering with it shows. Notch does the same with a document: it cuts a notch in Stellar with its fingerprint, without revealing the file.
 
 ## Try it now
 
@@ -98,12 +108,6 @@ The full steps, how to get a wallet and how to switch to mainnet are in [docs/mc
 
 **The paying wallet is yours.** It is created on your machine, its key never reaches the server, and the client only pays the account it has pinned (`EXPECTED_PAYEE`), so a fake API cannot charge you. Use a dedicated wallet with a small balance.
 
-## Demo video
-
-![Demo video](docs/assets/demo/notch-demo.gif)
-
-A 1:23 animation built from the real output of a run on Stellar testnet, with the waits shortened. The hashes shown can be opened in Stellar Expert. [Download the video (mp4)](https://github.com/josecadenax/notch/raw/main/docs/assets/demo/notch-demo-backup.mp4).
-
 ## How to run it
 
 Needs Node 22 or newer. The code lives in [`partes/josecadenax`](partes/josecadenax/README.md).
@@ -114,7 +118,7 @@ npm run setup:accounts           # testnet accounts, keys saved in .env
 npm start                        # API on http://localhost:3001
 npm run stamp -- file.pdf        # another terminal: hash, pay and stamp
 npm run verify -- file.pdf <tx>  # check a file against a stamp
-npm test                         # 57 tests
+npm test                         # 86 tests
 ```
 
 To stamp against the public API instead of your local server, create your wallet with `npm run setup:accounts -- --agent-only`, copy its `AGENT_SECRET` into `.env` and run:
@@ -150,3 +154,7 @@ A stamp made against the public API (deployed on Railway): [`16e1df0c…a80d`](h
 ## Team and parts
 
 - [josecadenax](https://github.com/josecadenax): [their part](partes/josecadenax/README.md)
+
+## Project context
+
+**Track:** API de pago (x402) · Código 402 · BAF México × Programa de Embajadores de Stellar · Stellar testnet and mainnet
