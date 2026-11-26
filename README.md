@@ -11,7 +11,9 @@ Español | [English](README.en.md)
 [![mainnet API](https://img.shields.io/website?url=https%3A%2F%2Fzestful-mercy-production-31bdd567.up.railway.app&up_message=online&down_message=offline&label=mainnet%20API)](https://zestful-mercy-production-31bdd567.up.railway.app)
 [![License: ISC](https://img.shields.io/badge/license-ISC-blue)](LICENSE)
 
-**Una prueba de que un documento existía en una fecha, que un agente de IA compra por un centavo.**
+**Notch deja constancia de cuándo existió un documento, y se cobra por uso: un centavo de dólar por sello.**
+
+Está pensado para agentes de IA, que ya escriben reportes y contratos pero no tienen cuenta ni tarjeta para pagar un servicio.
 
 Cuando un agente de IA entrega un reporte o un contrato, nadie puede demostrar después cuándo se hizo ni si lo editaron. Notch resuelve eso: el agente envía la huella digital del archivo (un código único llamado hash; el archivo no sale de su máquina), paga 0.01 USDC y Notch la guarda en la red Stellar. Desde ese momento, cualquiera puede comprobar gratis que el documento existía a más tardar en esa fecha y que no ha cambiado.
 

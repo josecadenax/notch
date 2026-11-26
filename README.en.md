@@ -11,7 +11,9 @@
 [![mainnet API](https://img.shields.io/website?url=https%3A%2F%2Fzestful-mercy-production-31bdd567.up.railway.app&up_message=online&down_message=offline&label=mainnet%20API)](https://zestful-mercy-production-31bdd567.up.railway.app)
 [![License: ISC](https://img.shields.io/badge/license-ISC-blue)](LICENSE)
 
-**Proof that a document existed on a given date, which an AI agent buys for one cent.**
+**Notch records when a document existed, and charges per use: one cent of a dollar per stamp.**
+
+It is built for AI agents, which already write reports and contracts but have no account or credit card to pay for a service.
 
 When an AI agent delivers a report or a contract, nobody can later show when it was made or whether it was edited. Notch solves that: the agent sends the file's digital fingerprint (a unique code called a hash; the file stays on its machine), pays 0.01 USDC, and Notch records it on the Stellar network. From then on, anyone can check for free that the document existed no later than that date and has not changed.
 
