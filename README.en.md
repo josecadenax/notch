@@ -21,6 +21,10 @@ An agent hashes what it produced, pays 0.01 USDC with x402, and Notch anchors th
 
 **Track:** API de pago (x402) · Código 402 · BAF México × Programa de Embajadores de Stellar · Stellar testnet (test money, no real value)
 
+## Why it is called Notch
+
+A *notch* is the small cut that used to be made in a stick or a piece of wood to keep a record of something. It is the oldest way of keeping a record, and it has the properties we want: the mark is permanent, it proves that something was there, it does not say what it was, and tampering with it shows. Notch does the same with a document: it cuts a notch in Stellar with its fingerprint, without revealing the file.
+
 ## The problem
 
 Agents now write reports, contracts and datasets, and often get paid for them. When someone asks "was this written before the deadline?" or "was it changed afterwards?", the only evidence is the agent's own logs, which the same party controls.

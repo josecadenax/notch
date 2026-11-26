@@ -21,6 +21,10 @@ Un agente calcula el hash de lo que produjo, paga 0.01 USDC con x402, y Notch an
 
 **Track:** API de pago (x402) · Código 402 · BAF México × Programa de Embajadores de Stellar · Stellar testnet (dinero de prueba, sin valor real)
 
+## Por qué se llama Notch
+
+*Notch* significa **muesca**: el corte pequeño que se hacía en un palo o una madera para dejar constancia de algo. Era la forma más antigua de llevar un registro, y tiene las mismas propiedades que buscamos: la marca es permanente, prueba que algo estuvo ahí, no dice qué era y se nota si alguien intenta alterarla. Notch hace lo mismo con un documento: deja una muesca en Stellar con su huella, sin revelar el archivo.
+
 ## El problema
 
 Los agentes ya escriben informes, contratos y conjuntos de datos, y a veces cobran por ellos. Cuando alguien pregunta "¿esto existía antes de la fecha límite?" o "¿se modificó después?", la única evidencia son los registros del propio agente, que controla la misma parte.

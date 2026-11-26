@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <g transform="translate(0 -54)">
+  <!-- the tally stick: the old way of keeping a record was a notch cut into wood -->
+  <rect x="136" y="388" width="752" height="236" rx="56" fill="#FAD84A"/>
+  <!-- notches cut into the top edge, one per record -->
+  <path fill="#413A68" d="M236 376 H320 L278 466 Z"/>
+  <path fill="#413A68" d="M388 376 H472 L430 466 Z"/>
+  <path fill="#413A68" d="M540 376 H624 L582 466 Z"/>
+  <!-- the newest notch is the stamp: the one that is anchored -->
+  <path fill="#12A8B5" d="M697.6 388 H770.4 L734 466 Z"/>
+  <!-- the anchored line under it -->
+  <rect x="136" y="704" width="752" height="40" rx="20" fill="#2A2547"/>
+  <rect x="136" y="704" width="252" height="40" rx="20" fill="#12A8B5"/>
+  </g>
+</svg>

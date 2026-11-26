@@ -12,3 +12,14 @@
 | `favicon.ico` | 16, 32, 48 and 64 px |
 
 Direct link for forms and embeds: `https://raw.githubusercontent.com/josecadenax/notch/main/docs/assets/logo/notch-logo-1024.png`
+
+## Alternative logo: the tally stick
+
+`notch-logo-tally.svg` is an alternative mark built on what the name means: a tally stick with a notch cut for each record, and the newest notch in teal, the one that is anchored. Same palette and the same anchored line under it.
+
+| File | Use |
+|---|---|
+| `notch-logo-tally.svg` | Master file, vector, with purple background |
+| `notch-logo-tally-transparent.svg` | Same without background |
+| `notch-logo-tally-1024.png`, `-512`, `-256` | Raster sizes with background |
+| `notch-logo-tally-transparent-1024.png` | Raster without background |
