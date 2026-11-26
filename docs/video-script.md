@@ -183,11 +183,7 @@ STELLAR_NETWORK=pubnet NOTCH_ALLOW_MAINNET=1 SOROBAN_RPC_URL=https://soroban-rpc
 
 **Di:**
 
-> "Hoy Notch funciona en testnet y en mainnet, tiene un servidor MCP que se instala con un comando y 86 pruebas automáticas en verde. El agente paga solo a la cuenta que conoce, con un tope por sello, y nunca cobra dos veces."
->
-> "Lo siguiente: agrupar huellas en un árbol de Merkle para bajar el costo por sello, y, como opción, hacer cumplir el límite de gasto en la propia cuenta con cuentas inteligentes."
->
-> "El código está en github.com/josecadenax/notch. Gracias."
+> "Hoy Notch funciona en la red de pruebas y en la principal, tiene un servidor para Claude que se instala con un solo comando y ochenta y seis pruebas automáticas en verde. El agente paga solo a la cuenta que conoce, con un tope por sello, y nunca cobra dos veces. Gracias."
 
 ## Después de grabar
 
